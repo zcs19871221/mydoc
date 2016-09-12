@@ -1,0 +1,144 @@
+阅读顺序:
+顺着api读，先读dom,然后function，然后promise,ajax
+
+widget,scope，directive
+
+
+1.关于dom中的css
+    1.dom.style返回一个CSSStyleDeclaration对象，该对象只对应内联样式，包括属性：
+        dom.stye.cssText 内联文本
+        dom.style.length 内联属性长度
+    2.通过内联文本快速修改内联属性：
+        增加：
+            var addCssText = "backgroundColor:red;width:30px";
+            dom.style.cssText = dom.style.cssText + addCssText;
+        清空：
+            dom.style.cssText = '';
+    3.判断元素是否存在属性：可以通过style对象判断该元素是否拥有某个属性：
+        <div style="width:30px">
+        console.log(dom.style.height)是空，表明内敛样式里没有设置这个属性，但是height这个属性是存在的，可以用来判断属性是否存在。
+    4.获得计算出来的样式：为了获得真正的属性，需要通过:window.getComputedStyle(node)[属性名称]或者node.currentStyle[属性]获得
+    5.css属性和dom属性的转换：css中是background-color，dom中一律使用驼峰的方式：backgroundColor
+
+2.元素宽和高的获得：
+    1.获得window的：
+    通过htmlElement的offsetHeight和offsetWidht属性获得：
+    window.document.documentElement.offsetHeight
+    (window的document属性，然后document属性的第一个子元素属性获得html元素)
+    2.获得IE元素的宽，高：
+    node.offsetWidth（防止怪异模式下IE盒模型width和height不但包含内容，还包含border和padding的距离)
+    3.一般元素，通过css属性的width和height:
+    window.getComputedStyle(node).width
+    4.scroll相关的宽和高的获得:
+    通过htmlELement接口的scrollTop等属性获得。
+    5.clientWidth,offsetWidth,scrollWidth区别：见
+    http://stackoverflow.com/questions/21064101/understanding-offsetwidth-clientwidth-scrollwidth-and-height-respectively
+
+3.dom.attr(node, attr, value)
+设置attribute属性
+如果属性是selected checked disabled readOnly required open autofocus controls autoplay compact loop defer multiple
+之一(只要属性里有，就起作用)，那么
+同时设置attr和property的值:
+setAttribute("checked", "checked")
+node.checked = true;
+
+
+4.show和hide函数,确定有bug
+重写如下，核心是在dom对象上设置一个变量保存之前的属性。
+hide:
+    var display = window.getComputedStyle(dom).display;
+    if (display === "none") {
+        return '';
+    } else {
+        dom.olddisplay = display;
+        dom.style.display = "none";
+    }
+show:
+    var display = window.getComputedStyle(dom).display;
+    if (display === "none") {
+        dom.style.display = dom.olddisplay || "block";
+    } else {
+        return '';
+    }
+
+5.事件架构设计：
+1）bind
+给每个绑定元素有一个_b$id属性，是一个唯一值id，
+node._b$id = integer;
+有一个
+全局的变量，保存所有nodeid和对应的事件以及响应函数如下：
+_bindEvents = {
+    nodeId: {
+        eventname: [fn, fn, fn],
+        eventname2: [fn, fn, fn],
+        .......
+    }
+    nodeId2: {
+        eventname: [fn, fn, fn],
+        eventname2: [fn, fn, fn],
+    }
+    ........
+}
+每个事件响应函数增加一个属性，属性名是"_b$event" + nodeId,值是这个响应函数处理后的值(为了让ie的绑定函数this指向node)
+fn._b$event[nodeid] = 处理后的handler。
+
+这么做的母的就是，当这个node不删除的时候，通过判断_bindEvents就知道绑定情况。
+2)delegate
+_delgEvents = {
+    nodeId:{
+        eventname: {
+            query: [fnHandler, fnHandler1, fnHandler2],
+            query2: [fnHandler, fnHandler1, fnHandler2]
+            ......
+        },
+        eventname2: {
+            query: [fnHandler, fnHandler1, fnHandler2]
+            .......
+        }
+        .....
+    }
+    nodeId2:{
+        eventname: {
+            query: [fnHandler, fnHandler1, fnHandler2]
+        },
+        eventname2: {
+            query: [fnHandler, fnHandler1, fnHandler2]
+        }
+        .....
+    }
+    .........
+}
+
+domMap = {
+    query: queryDom
+
+}
+node.deletegate(type, query, fn);
+在node元素中给query查询的子节点的type事件类型绑定fn处理函数。
+缓存结构如上：_delgEvents
+
+
+
+
+3)element.querySelector的问题：
+  Selectors API选择器的查找范围仍旧是document，只不过在查找完毕之后会判断元素是否位于element的子树中。elem.querySelector(All)（str）相当于document.querySelector(All)（str）和elem子树的交集。
+这样就会有层级的问题出现：
+        <button>
+          <div id="main">
+            <div>test1</div>
+            <button>
+                <div>test2</div>
+            </button>
+          </div>
+        </button>
+var main = document.getElementById('main');
+main.querySelectorAll("button div");
+这时候筛选出的是<div>test1</div>,而不是需要的<div>test2</div>
+  解决的方法是：
+cssQuery:176
+暂时替换element的id属性，然后修改选择器变为:#id 原选择器,这样筛选的话，就是直接找到element节点，然后在里面筛选，筛选完成后再把element的id替换回来。
+
+4）target与currentTarget
+target属性是事件触发时候的触发对象，
+currentTarget是事件绑定对象。
+target在事件流的目标阶段；currentTarget在事件流的捕获，目标及冒泡阶段。只有当事件流处在目标阶段的时候，两个的指向才是一样的， 而当处于捕获和冒泡阶段的时候，target指向被单击的对象而currentTarget指向当前事件活动的对象（一般为父级）。

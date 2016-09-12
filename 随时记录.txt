@@ -1,0 +1,4 @@
+1.href="#" vs href="javascript:void(0)"(或者href="javascript:;")
+
+2.bowlder的问题之一：
+3768行，removeChild之后，会导致有滑动的页面，滑动条位置由于删掉了dom而到了原位置的上部分，如果这时候有新的dom插入，位置就会有问题。（过多的页面bind真的好吗？那么多的回调函数句柄)

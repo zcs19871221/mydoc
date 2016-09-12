@@ -1,0 +1,38 @@
+svn:
+https://svn.ws.netease.com/public/cms-reborn/articlefilter/branches/branch-front1/src/main/front
+https://svn.ws.netease.com/public/cms-reborn/articlefilter/trunk/src/main/front
+https://svn.ws.netease.com/public/cms-reborn/articlefilter/
+
+测试地址：
+106.38.231.147 https://testar.ws.netease.com/main.html#index
+
+线上地址：
+https://ar.ws.netease.com/main.html
+
+本地地址：
+http://cms.f2e.devtest.ar.ws.netease.com/main.html#index
+
+文档地址：
+http://doc.ws.netease.com/pages/viewpage.action?pageId=3647296
+
+测试工具
+http://jira.netease.com/projects/CMS?selectedItem=com.atlassian.jira.jira-projects-plugin:components-page
+
+相关人员
+后端 绉波
+测试 薛飞飞
+原作者 赵伟男
+pm 汪君楚
+产品 李泽宇
+
+接口地址：
+220.181.98.66 devtest.ar.ws.netease.com
+
+
+
+
+domReady:
+init()
+
+环境dom:
+scope.$root

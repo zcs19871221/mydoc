@@ -1,0 +1,28 @@
+1.可编写目录位于
+\build\release\js下，包含
+   + conf 目录 
+   |        + config.js 模块配置文件
+   |        + init.js 全局配置初始化文件
+   + module 目录
+   |        + JS 检测模块文件 (*.js)
+   |        + JS 检测模块文件 (*.js)
+   |        + JS 检测模块文件 (*.js)
+   |        + ……
+   + action 目录
+            + helper.js 检测开始是加入的工具方法集
+            + autoscript.js 用户的自动化浏览器控制文件
+            + report.js 检测完成后执行的文件，用于生成检测报告
+
+2.模块管理如下：
+1).模块定义：通过定义命名空间来设置文件的功能和位置，比如：
+namespace('module.none_expires')
+就解析为module/none_expires.js
+2).模块的载入：
+使用App.loadScript方法，该方法是同步的，读取路径的内容进行执行，类似require
+
+3.初始化流程如下：
+当以--start开始的情况下，会先执行init.js文件：
+1）读取config.js文件
+2）执行config.js中的global，一般global里头都是给App全局变量添加自定义方法的
+3）判断是否config.js中配置了automation，如果为null则直接执行module部分如果有内容则会在自动化脚本内确切时间点执行module代码
+
