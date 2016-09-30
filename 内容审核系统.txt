@@ -28,6 +28,10 @@ pm 汪君楚
 接口地址：
 220.181.98.66 devtest.ar.ws.netease.com
 
+部署地址：
+http://omad.hz.netease.com/env/envManager?productId=626&moduleId=5358
+点击一键部署即可
+
 
 
 
@@ -36,3 +40,5 @@ init()
 
 环境dom:
 scope.$root
+
+            631587721
