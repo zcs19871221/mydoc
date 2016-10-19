@@ -1,0 +1,88 @@
+var aliasPromise = $$.run(aliasConf).then(function(conf){
+conf && extend(true, pathAlias, conf);
+});
+    $$.run
+    return amdLoader.get(name).then(function(def){
+      if(!def || !def.fn){
+        return def;
+      }else if(isFunction(def.fn)){
+        var mod = observableObj(),
+            fnResult = def.fn.apply(mod, def.depInject);
+        return (fnResult && typeof fnResult == 'object') ? fnResult : mod;
+      }else{
+        return def.fn;
+      }
+    }).then(function(conf) {
+       conf && extend(true, pathAlias, conf);
+    })
+        ->amdLoader.get(name)
+            如果没有aliasConf,仅仅返回一个defer,否则调用
+            ->amdLoader.makeDefer(name)
+                通过ajax.require利用jsonP执行目标js文件,js文件里再次执行
+                define方法,把define(id, 依赖, 函数)这几个参数push到一个
+                数组defineQueue中
+                ->ajax.require
+                    成功执行后,调用
+                    ->amdLoader.postDefine(name, null, notDefine);
+                        新建一个promise: require(defined依赖的文件名数组).then()
+                        通过defer.all(这个新建的promise).then(function() {
+                            defer.resolve()
+                        })
+                        实现完成上边的这个promise后执行原defer.resolve
+                        其中require() 执行了:
+
+                            return $q.all(promises).then();
+                            而这个promises就是每一个依赖文件封装的promise:
+                            $q.ref().then(function() {
+                                return makeDefer(name);
+                            })
+
+                        对依赖处理
+                        ->require
+                            对依赖中的每个数组调用
+                            ->amdLoader.depPromise(depfile)
+                                然后根据情况再次调用makeDefer
+                            all执行完depPromise中每个依赖后,设置defer.def;
+
+            ->
+
+
+几种文件名称:
+%
+zcs@1233213
+!
+
+
+
+
+
+
+
+
+
+
+compile()
+    ->load("", document.body, rootWidget, undefiend)
+        ->Widget.create(wrap = document.body, parent = rootWidget, defname = "")
+            1.创建guid
+            2.wrap['ne-wguid'] = widget.guid = guid 标识实例化完毕
+            3.widgetCache[guid] = widget; 缓存widget
+            4.widget.$root = $$(document.body)
+            5.  widget.parent = parent;
+                parent.children.push(widget);
+        ->getPluginPromise(node = body, value = undefined, data = undefined)
+            获取ne-plugin的pormise return $q.all()
+            =>.then(匿名函数)
+                ->amdLoader.instantiate(null, widget = 上边create的基于body的widget)
+                     widget.models = new Models(widget);
+                     ->parseState(scope)
+                     ->widget._preparedDefer.resolve(widget);
+                        => widget.then(fn) (['ne-state-extend', 'ne-extend'])
+                ->widget.render()
+                    ->widget.wander()
+                        ->wanderDom()
+
+
+
+                 widget.wander()
+                    wanderDom
