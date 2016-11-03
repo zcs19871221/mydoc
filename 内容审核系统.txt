@@ -33,7 +33,8 @@ http://omad.hz.netease.com/env/envManager?productId=626&moduleId=5358
 点击一键部署即可
 
 
-
+配置本地模拟接口
+mobile.controller.coffee
 
 domReady:
 init()
@@ -41,4 +42,4 @@ init()
 环境dom:
 scope.$root
 
-            631587721
+            

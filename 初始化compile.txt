@@ -1,68 +1,7 @@
-var aliasPromise = $$.run(aliasConf).then(function(conf){
-conf && extend(true, pathAlias, conf);
-});
-    $$.run
-    return amdLoader.get(name).then(function(def){
-      if(!def || !def.fn){
-        return def;
-      }else if(isFunction(def.fn)){
-        var mod = observableObj(),
-            fnResult = def.fn.apply(mod, def.depInject);
-        return (fnResult && typeof fnResult == 'object') ? fnResult : mod;
-      }else{
-        return def.fn;
-      }
-    }).then(function(conf) {
-       conf && extend(true, pathAlias, conf);
-    })
-        ->amdLoader.get(name)
-            如果没有aliasConf,仅仅返回一个defer,否则调用
-            ->amdLoader.makeDefer(name)
-                通过ajax.require利用jsonP执行目标js文件,js文件里再次执行
-                define方法,把define(id, 依赖, 函数)这几个参数push到一个
-                数组defineQueue中
-                ->ajax.require
-                    成功执行后,调用
-                    ->amdLoader.postDefine(name, null, notDefine);
-                        新建一个promise: require(defined依赖的文件名数组).then()
-                        通过defer.all(这个新建的promise).then(function() {
-                            defer.resolve()
-                        })
-                        实现完成上边的这个promise后执行原defer.resolve
-                        其中require() 执行了:
 
-                            return $q.all(promises).then();
-                            而这个promises就是每一个依赖文件封装的promise:
-                            $q.ref().then(function() {
-                                return makeDefer(name);
-                            })
-
-                        对依赖处理
-                        ->require
-                            对依赖中的每个数组调用
-                            ->amdLoader.depPromise(depfile)
-                                然后根据情况再次调用makeDefer
-                            all执行完depPromise中每个依赖后,设置defer.def;
-
-            ->
-
-
-几种文件名称:
-%
-zcs@1233213
-!
-
-
-
-
-
-
-
-
-
-
-compile()
-    ->load("", document.body, rootWidget, undefiend)
+aliasPromise.then(
+    compile()
+    ->load加载ne-module(moduleFile = "main.js", wrap = body, parentWidget = rootWidget, data=undefined)
         ->Widget.create(wrap = document.body, parent = rootWidget, defname = "")
             1.创建guid
             2.wrap['ne-wguid'] = widget.guid = guid 标识实例化完毕
@@ -70,19 +9,83 @@ compile()
             4.widget.$root = $$(document.body)
             5.  widget.parent = parent;
                 parent.children.push(widget);
+            6.widgetCache[文件路径].push(widget);
         ->getPluginPromise(node = body, value = undefined, data = undefined)
-            获取ne-plugin的pormise return $q.all()
+            处理ne-plugin指令
+            return $q.all([])
             =>.then(匿名函数)
-                ->amdLoader.instantiate(null, widget = 上边create的基于body的widget)
-                     widget.models = new Models(widget);
-                     ->parseState(scope)
-                     ->widget._preparedDefer.resolve(widget);
-                        => widget.then(fn) (['ne-state-extend', 'ne-extend'])
-                ->widget.render()
-                    ->widget.wander()
-                        ->wanderDom()
+                根据这个模块的类型对应不同处理:
+                    .html后缀
+
+                    空模块(ne-module值为空或没有该属性)
+
+                    其他类型:
+                        amdLoader.get(moduleFile).deploy(widget, parentWidget
+                            ->amdLoader.makeDefer(name)
+                                ->ajax.require
 
 
-
-                 widget.wander()
-                    wanderDom
+=>  amdLoader.postDefine(name, null, notDefine)             
+[amdLoader.get(moduleFile).deploy(widget, parentWidget);
+    ->amdLoader.makeDefer(name)
+        ->ajax.require
+            通过jsonp方式(script.src= "")异步获得文件,完成后执行文件,
+            执行define的时候,把define的function push进一个变量defineQueue
+            -> succes后执行 amdLoader.postDefine(name, null, notDefine);
+                取出define时候push进去的def对象,判断,如果fn是文本,保存进
+                 exports["text!"+file] = def.fn;
+                 如果是对象,保存进exports[file] = def.fn; 触发resolve,执行后续.
+                然后处理依赖关系,执行:
+                require(依赖).then() promise后触发defer.resolve(def);
+                ->requrie方法
+                    会对每一个依赖进行判断,如果是css直接创建link标签,设置src属性处理.
+                    否则就把每一个依赖调用depPromise,调用makedefer弄成一个promise
+                    return $q.all(promises).then(就是让每个依赖都异步的获取文件.都处理完毕后的then方法就是通过文件名把保存在amdLoader中的对象取出来,返回下一个then就会把这个依赖数组放到depInject中
+                    ->depPromise 对每一个依赖再次调用makedefer
+                ->amdLoader.getExport:当前的依赖都加载完成后,这些依赖的构造函数都执行:创建一个继承observableObj(就是自带on,emit等处理方法的对象)的对象,使用该对象作为上下文执行构造函数,同时把这个的依赖作为参数执行. 
+(load
+    判断处理
+        amdLoader.get(moduleFile).deploy(widget, parentWidget)
+            异步获得核心文件,处理依赖     
+                每一个依赖再次makeDefer       
+                每一个依赖再次makeDefer  
+                每一个依赖再次makeDefer
+            当所有依赖处理完毕,调用deploy方法:只有最顶层调用deploy,因为顶层的defer(也就是定义在load方法中的defer)才在最后then了一个执行deploy的方法.
+            而其他的底层的makeder在执行完毕后调用的resolve只不过是让父亲defer继续走(比如一个递归的依赖处理完毕后调用resolve,调用all里的then判断是否all执行完毕了没有)
+            最终define出的数据结构保存在
+            amdLoader._fns = {
+                "文件名": {
+                    _deps: "依赖的文件名数组",
+                    depInject: "依赖的文件执行后返回的对象数组",
+                    fn: "函数对象"
+                }
+            }
+)
+amdLoader.instantiate(def, widget, args);
+    依赖满足后:
+        使用本widget的scope执行def.fn
+        处理ne-state
+            把ne-state中的对象放到scope.state中
+        处理'ne-state-extend''ne-state-extend'
+            把该表达式按照父亲scope的上下文执行,放到scope.state
+        'ne-extend'
+            把该表达式按照父亲scope的上下文执行,放到scope中
+    ->loadHtml(def.name, widget)
+        处理ne-transclude:如果有该标签,那么把这个包裹dom的innerHTML取出来作为
+        这个dom的transclude属性.
+        ->render
+            ->wander
+                处理ne-destroy
+                处理ne-delg (执行函数)
+                搜索包裹dom里是否有script[ne-macro],如果有那么进行处理(宏模板)
+                ->wanderdom(wrap=body, fn1=自定义函数, fn2=自定义函数)
+                    ->fn(wrap)
+                        处理ne-if
+                            [如果值是false,直接remove,否则c
+                                compiled = true; 
+                                widget.$refresh2 = true;
+                                widget.wander(node, scope, true);
+                                widget.compile(node);
+                            ]
+                        处理优先指令
+                        3512
