@@ -43,3 +43,49 @@ init()
 scope.$root
 
             
+普通管理员：1 
+质量审核用户：2
+长效审核用户：3
+质量审核管理员：4
+长效审核管理员:5
+
+if (Constants.Role.ADMIN.getValue() == roleid) {
+                map.put("canSet", true);
+                map.put("canLog", true);
+                map.put("canLongLog", true);
+                
+                map.put("canFixShenhe", true);
+                map.put("canFixLong", true);
+                
+            } else if (Constants.Role.ADMIN_S.getValue() == roleid) {
+                map.put("canWorkSpace", true);
+                map.put("canLog", true);
+                map.put("canSet", true);
+                map.put("auditType", "s");
+                
+                map.put("canFixShenhe", true);
+                
+            } else if (Constants.Role.ADMIN_C.getValue() == roleid) {
+                map.put("canWorkSpace", true);
+                map.put("canLongLog", true);
+                map.put("canSet", true);
+                map.put("auditType", "c");
+                
+                map.put("canFixLong", true);
+                
+            } else if (Constants.Role.ORDINARY_C.getValue() == roleid) {
+                map.put("canWorkSpace", true);
+                map.put("auditType", "c");
+            } else if (Constants.Role.ORDINARY_S.getValue() == roleid) {
+                map.put("canWorkSpace", true);
+                map.put("auditType", "s");
+            } else {
+                map.put("canWorkSpace", false);
+                map.put("canLog", false);
+                map.put("canLongLog", false);
+                map.put("canSet", false);
+            }
+
+
+10.234.130.146
+
