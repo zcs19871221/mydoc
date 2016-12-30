@@ -1,7 +1,0 @@
-1.首先用http://dev.f2e.163.com/system/rachis/rachis.shtml#/create
-创建快速项目(etc) ,生成shtml文件，使用jsp模板语言velocity。
-2.使用本地环境gooda开发，（html+css+js+vm模板语言）
-3.本地测试无问题后，提交svn
-4.使用go项目关联svn到cms系统,几个阶段check后提交到cms系统 （关联频道id）
-4.由编辑人员根据我们提供的url在cms系统修改和调试，最终由编辑人员进行正式线上的发布。
-（部分频道有我们发布）

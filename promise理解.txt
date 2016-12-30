@@ -1,4 +1,0 @@
-promise中的错误处理:
-1.在new Promise中如果进行异步操作，回调函数的错误必须用reject处理，处理后，
-后续的then可以不注册reject，最终的catch就可以捕获，但如果不用reject处理，程序崩溃
-2.在注册的then中的操作错误会自动捕获到catch里。
