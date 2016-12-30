@@ -1,0 +1,177 @@
+var defer = function() {
+    var pending = [],
+        value;
+    function resolve(val) {
+        if (pending) {
+            var callbacks = pending;
+            pending = null;
+            value = ref(val);
+            callbacks.forEach(function(fn) {
+                value.then(fn[0], fn[1]);
+            })
+        }
+    }
+    function reject(e) {
+        resolve({
+            then: function(w1, w2) {
+                w2(e);
+            }
+        });
+    }
+    var prom = {
+        then: function(fn1, fn2) {
+            var def = defer();
+            var wrap1 = function(realvalue) {
+                try {
+                    var x = fn1(realvalue);
+                    def.resolve(x);
+                } catch (e) {
+                    def.reject(e);
+                }
+                
+            };
+            var wrap2 = function(e) {
+                if (fn2) {
+                     fn2(e);
+                } else {
+                    def.reject(e);
+                }
+            }
+            if (pending) {
+                pending.push([wrap1, wrap2]);
+            } else {
+                value.then(wrap1, wrap2);
+            }
+            return def.prom;
+        }
+
+    }
+    var ref = function(value) {
+        if (value.then) {
+            return value;
+        } else {
+            return {
+                then: function(fn) {
+                    fn(value);
+                }
+            }
+        }
+    }
+    return {
+        resolve: resolve,
+        prom: prom,
+        reject: reject
+    }
+}
+
+// 测试
+var promi = function(fn) {
+    var x = defer();
+    fn(x.resolve, x.reject);
+    return x.prom;
+}
+promi(function(resolve, reject) {
+    setTimeout(function() {
+        resolve(5);
+    }, 0)
+}).then(function(value) {
+   return promi(function(resolve) {
+        setTimeout(function() {
+            resolve(value + "abc");
+        }, 2000);
+   })
+}).then(function(value) {
+    console.log(value + "fff");
+}).then(null, function(e) {
+    console.log("error2" + e);
+});
+
+
+理解：
+每一个defer是一个整体，包含
+属性pending 同时作为状态标识用和包装后的回调函数的保存
+属性wrap_value  包装后的运行结果
+对象promise：包含then方法的函数
+方法resolve：触发单个整体向下一个promise走的函数
+方法reject：同上，只不过是使用错误回调函数。
+以及其他的一些方法。
+
+几个核心点：
+一.状态改变不可逆：
+pending初始值是[]，当非undefined的时候，
+表示可以触发resolve，触发resolve向下个状态走之后，
+pending设置为undefined，表示resolve只能做一次。
+
+
+二。当在最上层调用then方法的时候：
+传入参数：用户输入的回调函数：usercb
+在then内部做了几件事：
+1. 创建一个新的defer：new_defer
+这个新的defer就是下一个promise，
+并return new_defer 让后面的回调函数在new_defer里处理。
+2. 包装回调函数
+包装的回调函数引用了几个变量：
+1) 新建的new_defer
+2) 保存的用户回调usercb
+接收一个参数real_value，执行new_defer.resolve(usercb(real_value))
+就是说当执行这个包装的回调的时候，
+首先会把上一个promise执行resolve的真实结果real_value的值
+传到这个回调里执行出一个结果，然后触发new_defer的resolve方法
+实现向下一个promise走。
+3.判断当前defer状态，决定立刻执行包装的回调还是push到pending里
+查看是否resolve了(是否有wrap_value)或者是否执行完了有结果，
+如果是，那么wrap_value.then(wrapcb)
+
+3.1 如果wrap_value不是原生的promise，是包装的话
+包装函数会取出realvalue，pending里的wrapcb
+那么就会简单的执行wrapcb(realvalue)
+然后跳到下一个promise
+3.2 如果value是promise的处理情况
+如果return 的value是promise，那么wrap_value也是promise，
+那么wrap_value.then(wrapcb)就会进入标准的then处理，因为当前user_defer就是用户
+返回的defer，所以这个wrap_value.then()实际上是user_defer.then()
+最后的处理就会根据user_defer的resolve的情况执行，
+也就是用户的resolve时机，当用户resolve(val)之后，
+会触发包装wrap_val.then(wrapcb)，从而触发wrapcb里执行resolve(cb(val)),从而跟最上层的promise连接起来
+
+
+三。resolve方法
+执行resolve(user_value)的时候，就表示当前value处理完了，
+1.触发之后，首先包装user_value的值，保存到defer的value里wrap_value
+如果是有then方法的类promise对象，直接返回value.否则把value包装起来，
+返回包含then方法的对象,这个then方法核心就是保存一个value的引用，
+然后取出pending里的wrapcb，执行wrapcb(value);
+
+value.then(wrapcb)，无论value是自然值，还是promise，
+核心点都是通过wrapcb(value)，让wrapcb里执行下一个defer.resolve向下走。
+
+
+四。何时向下走
+当then的时候，会判断pending是否为空，如果为空，说明
+已经执行完resolve，那么本defer的wrap_value必然存在了，
+通过执行wrap_value.then(wrapcb)向下走
+
+当resolve的时候，会判断pending是否有回调函数了，如果有，那么说明
+then已经执行了，那么执行wrap_value.then(wrapcb)向下走。
+
+核心思想：
+1. 链式调用，本作用域方法中保存下个作用域的方法。然后调用本作用域方法，
+把本作用域和。类似于如下：
+function defer () {
+  var value,
+    cb;
+}
+defer1.then = function(cb) {
+    defer2;
+    var cb = function(value) {
+        defer2.resolve(cb(value))
+    }
+    defer1.cb = cb;
+}
+defer1.resolve = function () {
+    defer1.cb(value) => defer2.resolve(cb(value));
+}
+
+2. 延迟调用
+resolve和then的时候会判断运行结果来决定是否立刻调用
+wrap_value.then()来处理结果。

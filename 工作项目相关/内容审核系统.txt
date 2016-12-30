@@ -1,0 +1,91 @@
+svn:
+https://svn.ws.netease.com/public/cms-reborn/articlefilter/branches/branch-front1/src/main/front
+https://svn.ws.netease.com/public/cms-reborn/articlefilter/trunk/src/main/front
+https://svn.ws.netease.com/public/cms-reborn/articlefilter/
+
+测试地址：
+106.38.231.147 https://testar.ws.netease.com/main.html#index
+
+线上地址：
+https://ar.ws.netease.com/main.html
+
+本地地址：
+http://cms.f2e.devtest.ar.ws.netease.com/main.html#index
+
+文档地址：
+http://doc.ws.netease.com/pages/viewpage.action?pageId=3647296
+
+测试工具
+http://jira.netease.com/projects/CMS?selectedItem=com.atlassian.jira.jira-projects-plugin:components-page
+
+相关人员
+后端 绉波
+测试 薛飞飞
+原作者 赵伟男
+pm 汪君楚
+产品 李泽宇
+
+接口地址：
+220.181.98.66 devtest.ar.ws.netease.com
+
+部署地址：
+http://omad.hz.netease.com/env/envManager?productId=626&moduleId=5358
+点击一键部署即可
+
+
+配置本地模拟接口
+mobile.controller.coffee
+
+domReady:
+init()
+
+环境dom:
+scope.$root
+
+            
+普通管理员：1 
+质量审核用户：2
+长效审核用户：3
+质量审核管理员：4
+长效审核管理员:5
+
+if (Constants.Role.ADMIN.getValue() == roleid) {
+                map.put("canSet", true);
+                map.put("canLog", true);
+                map.put("canLongLog", true);
+                
+                map.put("canFixShenhe", true);
+                map.put("canFixLong", true);
+                
+            } else if (Constants.Role.ADMIN_S.getValue() == roleid) {
+                map.put("canWorkSpace", true);
+                map.put("canLog", true);
+                map.put("canSet", true);
+                map.put("auditType", "s");
+                
+                map.put("canFixShenhe", true);
+                
+            } else if (Constants.Role.ADMIN_C.getValue() == roleid) {
+                map.put("canWorkSpace", true);
+                map.put("canLongLog", true);
+                map.put("canSet", true);
+                map.put("auditType", "c");
+                
+                map.put("canFixLong", true);
+                
+            } else if (Constants.Role.ORDINARY_C.getValue() == roleid) {
+                map.put("canWorkSpace", true);
+                map.put("auditType", "c");
+            } else if (Constants.Role.ORDINARY_S.getValue() == roleid) {
+                map.put("canWorkSpace", true);
+                map.put("auditType", "s");
+            } else {
+                map.put("canWorkSpace", false);
+                map.put("canLog", false);
+                map.put("canLongLog", false);
+                map.put("canSet", false);
+            }
+
+
+10.234.130.146
+
