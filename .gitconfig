@@ -1,0 +1,8 @@
+[user]
+	mail = 530627552@qq.com
+	name = zcs
+[credential]
+	helper = store --file ~/.pwd
+
+[core]
+	quotepath = false
