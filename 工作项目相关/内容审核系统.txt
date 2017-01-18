@@ -48,14 +48,38 @@ scope.$root
 长效审核用户：3
 质量审核管理员：4
 长效审核管理员:5
+public WebResult getCurrentUserInfo() {
+        Map<String,Object> map = new HashMap<String, Object>();
+        UserInfoVO infoVO = UserUtil.getCurrentUserInfo();
 
-if (Constants.Role.ADMIN.getValue() == roleid) {
+        map.put("canCheckWorkSpace", false);
+        map.put("canDyWorkSpace", false);
+        map.put("canWorkSpace", false);
+        map.put("canLog", false);
+        map.put("canLongLog", false);
+        map.put("canDyLog", false);
+        map.put("canSet", false);
+        map.put("auditType", "n");
+        
+        map.put("canFixShenhe", false);
+        map.put("canFixLong", false);
+        map.put("canFixDy", false);
+
+        if(infoVO != null) {
+            map.put("userid", infoVO.getUserid());
+            map.put("realName", infoVO.getRealname());
+            Integer roleid = infoVO.getRole();
+            map.put("role", infoVO.getRole());
+
+            if (Constants.Role.ADMIN.getValue() == roleid) {
                 map.put("canSet", true);
                 map.put("canLog", true);
                 map.put("canLongLog", true);
+                map.put("canDyLog", true);
                 
                 map.put("canFixShenhe", true);
                 map.put("canFixLong", true);
+                map.put("canFixDy", true);
                 
             } else if (Constants.Role.ADMIN_S.getValue() == roleid) {
                 map.put("canWorkSpace", true);
@@ -73,19 +97,31 @@ if (Constants.Role.ADMIN.getValue() == roleid) {
                 
                 map.put("canFixLong", true);
                 
+            } else if (Constants.Role.ADMIN_D.getValue() == roleid) {
+                map.put("canDyWorkSpace", true);
+                map.put("canDyLog", true);
+                map.put("auditType", "d");
+                map.put("canSet", true);
+                map.put("canFixDy", true);
+                
+            } else if (Constants.Role.ORDINARY_D.getValue() == roleid) {
+                map.put("canDyWorkSpace", true);
+                map.put("auditType", "d");
             } else if (Constants.Role.ORDINARY_C.getValue() == roleid) {
                 map.put("canWorkSpace", true);
                 map.put("auditType", "c");
             } else if (Constants.Role.ORDINARY_S.getValue() == roleid) {
                 map.put("canWorkSpace", true);
                 map.put("auditType", "s");
-            } else {
+            }else if (Constants.Role.ADMIN_H.getValue() == roleid) {
+                map.put("canCheckWorkSpace", true);
+                map.put("auditType", "h");
+            }else {
                 map.put("canWorkSpace", false);
                 map.put("canLog", false);
                 map.put("canLongLog", false);
                 map.put("canSet", false);
             }
+        }
 
-
-10.234.130.146
 

@@ -75,7 +75,7 @@
                                 ->amdLoader.get(moduleFile).deploy(widget, parentWidget)(这个异步取文件的方法见下面)
                                     ->amdLoader.instantiate(def, widget, extendArr)
                                         (这次和上边的区别在于这次有依赖def)
-                                        ->然后就执行获取的define里的函数
+                                        【->然后就执行获取的define里的真正定义的模块函数】
                                         ->prepared()
                                         ->loadHtml()
                                             如果wrap元素是空的话(innerHTML为空)

@@ -108,3 +108,6 @@
     Ctrl + k => Ctrl + U
 ## 转小写
     Ctrl + k => Ctrl + L
+
+## 隐藏左侧的菜单
+    ctrl + k + b
