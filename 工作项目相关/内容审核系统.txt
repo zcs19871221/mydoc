@@ -125,3 +125,13 @@ public WebResult getCurrentUserInfo() {
         }
 
 
+账号
+montest22@163.com  网易号管理员
+
+montest68@163.com  抽检管理员
+
+montest87@163.com  长效管理员
+
+montest75@163.com 普通管理员(拥有文章，二次，图片工作台和日志)
+
+pheobe_love@163.com feilu10051628 总管理员权限

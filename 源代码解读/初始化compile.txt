@@ -9,8 +9,7 @@
             5.  widget.parent = parent;
                 parent.children.push(widget);
             6.widgetCache[文件路径].push(widget);
-        widget.isolate
-        widget.scope
+        widget.scope创建新的scope，如果非isolate，prototype指向父亲scope
         ->getPluginPromise(处理插件ne-plugin)然后执行
                 [根据ne-module的内容对应不同处理:
                     1).html后缀
@@ -43,7 +42,7 @@
                                 首先处理ne-if
                                 然后处理属性中的优先处理指令
                                 然后处理所有的节点属性,跳过上一步的优先指令和ne-role指令
-                                (优先节点就是_directives里除了ne-role的指令)
+                                (优先指令就是_directives里除了ne-role的指令)
                                     对每一个属性获得ne-后头的内容判断:
                                         1.是否是不能冒泡的事件
                                         2.对所有click,dbclick,contextmenu,键盘事件,鼠标事件和触摸事件(touch)处理
@@ -69,29 +68,36 @@
                         ->compile(wrap, widget, destroys)
                             ->wanderDom(会再次调用wanderDom,只不过这次只遍历element,而且element的处理函数是把所有modules都保存起来,为什么不在第一次遍历的时候都把modules处理了)  
 
-                            ->load(ne-module, wrap, parentWidget)
-                            (遍历moduleWraps,对每一个module调用)
-                                这里跟body时候调用load的不同点在于,这次是有ne-module的值,要异步ajax取文件,再执行amdLoader.instantiate
-                                ->amdLoader.get(moduleFile).deploy(widget, parentWidget)(这个异步取文件的方法见下面)
-                                    ->amdLoader.instantiate(def, widget, extendArr)
-                                        (这次和上边的区别在于这次有依赖def)
-                                        【->然后就执行获取的define里的真正定义的模块函数】
-                                        ->prepared()
-                                        ->loadHtml()
-                                            如果wrap元素是空的话(innerHTML为空)
-                                                ->htmlLoader.load处理请求返回的html
-                                                    1)替换html中url中存在的href|module等='@'这种的url
-                                                    2)把取到的html放到一个div中,通过dom选择,获得这段html中所有的<style>和<link>标签,把它们放到<head>中,通过把这些标签增加onload方法,并通过类似promise.all的方法,让所有的style和link标签加载完成后,通过then再调用injectHtml(目的为了防止无样式闪烁,如果先把html放上去了,样式后到,还得从新渲染).
-                                                        ->injectHtml
-                                                            1.首先通过template.replace()替换模板,变量定义在ne-props中
-                                                            2.替换script变成append形式让它生效
-                                                        ->widget.render()
-                                            ->widget.render()这里就和上边一样了,遍历子节点
 
-                    执行完处理完子模块后(不一定真的执行完了,不过没关系),如果没有lazy_promise的话,等父亲widgetready后执行doInit
-                        ->doInit
-                            执行scope.init,然后widget.refresh roleUpdate
-                            然后执行widget._readyDefer.resolve(widget);表明这个组件准备完成
+        ->load(ne-module, wrap, parentWidget)
+        (遍历moduleWraps,对每一个module调用)
+            这里跟body时候调用load的不同点在于,这次是有ne-module的值,要异步ajax取文件,再执行amdLoader.instantiate
+            ->amdLoader.get(moduleFile).deploy(widget, parentWidget)(这个异步取文件的方法见下面)
+                ->amdLoader.instantiate(def, widget, extendArr)
+                    (这次和上边的区别在于这次有依赖def)
+                    【->然后就执行获取的define里的真正定义的模块函数】
+                    ->prepared()
+                        先处理ne-state然后
+                        处理'ne-state-extend', 'ne-extend'
+                    ->loadHtml()
+                        如果wrap元素是空的话(innerHTML为空)
+                            ->htmlLoader.load处理请求返回的html
+                                1)替换html中url中存在的href|module等='@'这种的url
+                                2)把取到的html放到一个div中,通过dom选择,获得这段html中所有的<style>和<link>标签,把它们放到<head>中,通过把这些标签增加onload方法,并通过类似promise.all的方法,让所有的style和link标签加载完成后,通过then再调用injectHtml(目的为了防止无样式闪烁,如果先把html放上去了,样式后到,还得从新渲染).
+                                    ->injectHtml
+                                        1.首先通过template.replace()替换模板,变量定义在ne-props中
+                                        2.替换script变成append形式让它生效
+                                        【这里完成dom加载】
+                                        ->widget.render()
+                                            这里就和上边一样了,先遍历处理所有子节点，然后执行处理完子模块后(不一定真的执行完了,不过没关系),如果没有lazy_promise的话,等父亲widgetready后执行
+                                            ->doInit
+                                                不是立刻执行，最早是setTimoue(function())执行，或者延迟1秒执行。
+                                                执行scope.init,然后widget.refresh roleUpdate
+                                                然后执行widget._readyDefer.resolve(widget);这时候可以执行ready方法，表明这个组件准备完成
+
+1.所以init函数不必加refersh，因为必定会refresh，
+2.ready的加载时间是init完成后，而不是dom完成后。
+3.非线上环境有可能先route加载完成，但是html还未加载的情况。和init加载不一致的情况
 
 
 
