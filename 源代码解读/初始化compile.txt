@@ -140,6 +140,8 @@
 
 双向绑定基于change事件,改变了后,从节点读数据,改变scope的值
 
+load函数里的第三个data参数等价于ne-extend，会在执行完模块主函数后extend到scope中。
+
 
                     
 
