@@ -59,3 +59,5 @@ montest87@163.com  长效管理员
 montest75@163.com 普通管理员(拥有文章，二次，图片工作台和日志)
 
 pheobe_love@163.com feilu10051628 总管理员权限
+
+node --inspect --expose-gc start.js
