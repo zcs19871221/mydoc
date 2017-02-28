@@ -140,6 +140,9 @@
 
 双向绑定基于change事件,改变了后,从节点读数据,改变scope的值
 
+初始化的时候，先遍历一遍所有的ne指令，然后在init完后，首次执行refresh进行刷新，
+包括一些初始化的工作，比如ne-repeat指令。
+
 load函数里的第三个data参数等价于ne-extend，会在执行完模块主函数后extend到scope中。
 
 
