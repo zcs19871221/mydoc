@@ -1,0 +1,985 @@
+<!doctype html>
+
+<html class="no-js" lang="en">
+
+
+
+<head>
+
+    <meta charset="utf-8">
+
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="http://www.netis.com/wp-content/themes/netis/js/MockupSlideshow/css/mockup.css" />
+
+    <link rel="stylesheet" href="http://www.netis.com/wp-content/themes/netis/css/normalize.css">
+
+    <link rel="stylesheet" href="http://www.netis.com/wp-content/themes/netis/css/main.css">
+
+    <link rel="stylesheet" href="http://www.netis.com/wp-content/themes/netis/css/fonts/fontsquirrel/stylesheet.css">
+
+    <link rel="stylesheet" href="http://www.netis.com/wp-content/themes/netis/js/vendor/slick/slick.css">
+
+    <link rel="stylesheet" href="http://www.netis.com/wp-content/themes/netis/js/vendor/slick/slick-theme.css">
+
+    <link rel="stylesheet" href="http://www.netis.com/wp-content/themes/netis/css/netis.css">
+
+    <script src="http://www.netis.com/wp-content/themes/netis/js/vendor/modernizr-2.8.3.min.js"></script>
+
+    <script src="http://www.netis.com/wp-content/themes/netis/js/vendor/jquery-1.11.3.min.js"></script>
+
+    <link rel="icon" type="image/png" href="http://www.netis.com/wp-content/themes/netis/img/favicon.png" sizes="any">
+
+    <meta name="msapplication-TileColor" content="#da532c">
+
+    <meta name="msapplication-TileImage" content="http://www.netis.com/wp-content/themes/netis/img/favicon/mstile-144x144.png">
+
+    <meta name="msapplication-config" content="http://www.netis.com/wp-content/themes/netis/img/favicon/browserconfig.xml">
+
+    <meta name="theme-color" content="#ffffff">
+
+    <script>
+
+        var app_home = "http://www.netis.com";
+
+        var app_siteurl = "http://www.netis.com";
+
+    </script>
+
+    <title>Netis &#8211; 即刻落地的业务性能管理</title>
+<link rel='dns-prefetch' href='//s.w.org' />
+		<script type="text/javascript">
+			window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/2.2.1\/72x72\/","ext":".png","svgUrl":"https:\/\/s.w.org\/images\/core\/emoji\/2.2.1\/svg\/","svgExt":".svg","source":{"concatemoji":"http:\/\/www.netis.com\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.7"}};
+			!function(a,b,c){function d(a){var b,c,d,e,f=String.fromCharCode;if(!k||!k.fillText)return!1;switch(k.clearRect(0,0,j.width,j.height),k.textBaseline="top",k.font="600 32px Arial",a){case"flag":return k.fillText(f(55356,56826,55356,56819),0,0),!(j.toDataURL().length<3e3)&&(k.clearRect(0,0,j.width,j.height),k.fillText(f(55356,57331,65039,8205,55356,57096),0,0),b=j.toDataURL(),k.clearRect(0,0,j.width,j.height),k.fillText(f(55356,57331,55356,57096),0,0),c=j.toDataURL(),b!==c);case"emoji4":return k.fillText(f(55357,56425,55356,57341,8205,55357,56507),0,0),d=j.toDataURL(),k.clearRect(0,0,j.width,j.height),k.fillText(f(55357,56425,55356,57341,55357,56507),0,0),e=j.toDataURL(),d!==e}return!1}function e(a){var c=b.createElement("script");c.src=a,c.defer=c.type="text/javascript",b.getElementsByTagName("head")[0].appendChild(c)}var f,g,h,i,j=b.createElement("canvas"),k=j.getContext&&j.getContext("2d");for(i=Array("flag","emoji4"),c.supports={everything:!0,everythingExceptFlag:!0},h=0;h<i.length;h++)c.supports[i[h]]=d(i[h]),c.supports.everything=c.supports.everything&&c.supports[i[h]],"flag"!==i[h]&&(c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&c.supports[i[h]]);c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&!c.supports.flag,c.DOMReady=!1,c.readyCallback=function(){c.DOMReady=!0},c.supports.everything||(g=function(){c.readyCallback()},b.addEventListener?(b.addEventListener("DOMContentLoaded",g,!1),a.addEventListener("load",g,!1)):(a.attachEvent("onload",g),b.attachEvent("onreadystatechange",function(){"complete"===b.readyState&&c.readyCallback()})),f=c.source||{},f.concatemoji?e(f.concatemoji):f.wpemoji&&f.twemoji&&(e(f.twemoji),e(f.wpemoji)))}(window,document,window._wpemojiSettings);
+		</script>
+		<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+<link rel='stylesheet' id='contact-form-7-css'  href='http://www.netis.com/wp-content/plugins/contact-form-7/includes/css/styles.css?ver=4.6' type='text/css' media='all' />
+<link rel='https://api.w.org/' href='http://www.netis.com/wp-json/' />
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="http://www.netis.com/xmlrpc.php?rsd" />
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="http://www.netis.com/wp-includes/wlwmanifest.xml" /> 
+<meta name="generator" content="WordPress 4.7" />
+<link rel="canonical" href="http://www.netis.com/" />
+<link rel='shortlink' href='http://www.netis.com/' />
+<link rel="alternate" type="application/json+oembed" href="http://www.netis.com/wp-json/oembed/1.0/embed?url=http%3A%2F%2Fwww.netis.com%2F" />
+<link rel="alternate" type="text/xml+oembed" href="http://www.netis.com/wp-json/oembed/1.0/embed?url=http%3A%2F%2Fwww.netis.com%2F&#038;format=xml" />
+
+</head>
+
+
+
+<body class="netis zh  bgBlack10">
+
+    <!--[if lt IE 8]>
+
+            <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+
+    <![endif]-->
+
+    <input type="hidden" name="root" value="">
+
+    <input type="hidden" name="lan" value="zh">
+
+    <input type="hidden" name="mobileDetect" value="">
+
+    <div id="mobileThumb">
+
+        <div class="inner">
+
+            <div></div>
+
+            <div></div>
+
+            <div></div>
+
+        </div>
+
+    </div>
+
+
+
+    <div id="nav" class="bgBlack80">
+
+        <div class="logo">
+
+            <a href="/">
+
+                <img src="http://www.netis.com/wp-content/themes/netis/img/logo/netis_logo_inv.png">
+
+            </a>
+
+        </div>
+
+        <div class="menu">
+
+            <div class="item item0" data-menu0="home">
+
+                <a href="/"><span>首页</span></a>
+
+            </div>
+
+            <div class="item item1 " data-menu0="products">
+
+                <a href="http://www.netis.com/bpc">产品 </a>
+
+                <div class="subHolder">
+
+                    <div class="menu">
+
+                        <div class="item item0 " data-menu1="bpc">
+
+                            <a href="http://www.netis.com/bpc"><span>BPC</span></a>
+
+                        </div>
+
+                        <div class="item item1 " data-menu1="npm">
+
+                            <a href="http://www.netis.com/npm"><span>NPM</span></a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="item item2 " data-menu0="case-studies">
+
+                <a href="http://www.netis.com/case-studies"><span>用户案例 </span></a>
+
+            </div>
+
+            <div class="item item3 " data-menu0="solutions">
+
+                <a href="http://www.netis.com/city-commercial-bank">解决方案</a>
+
+                <div class="subHolder">
+
+                    <div class="menu">
+
+                        <div class="item item0 " data-menu1="city-commercial-bank">
+
+                            <a href="http://www.netis.com/city-commercial-bank"><span>城市商业银行</span></a>
+
+                        </div>
+
+                        <div class="item item1 " data-menu1="rural-credit-cooperatives">
+
+                            <a href="http://www.netis.com/rural-credit-cooperatives"><span>农信社、农商行 </span></a>
+
+                        </div>
+
+                        <div class="item item2 " data-menu1="brokerage-centralized">
+
+                            <a href="http://www.netis.com/brokerage-centralized"><span>券商集中交易系统</span></a>
+
+                        </div>
+
+                        <div class="item item3 " data-menu1="operator-support">
+
+                            <a href="http://www.netis.com/operator-support"><span>运营商业务支撑系统</span></a>
+
+                        </div>
+
+                        <div class="item item4 " data-menu1="private-cloud">
+
+                            <a href="http://www.netis.com/private-cloud"><span>私有云中的应用性能监控</span></a>
+
+                        </div>
+
+                        <div class="item item5 " data-menu1="large-data">
+
+                            <a href="http://www.netis.com/large-data"><span>运维大数据解决方案</span></a>
+
+                        </div>
+
+                        <div class="item item6 " data-menu1="electronic-channels">
+
+                            <a href="http://www.netis.com/electronic-channels"><span>电子渠道</span></a>
+
+                        </div>
+
+                        <div class="item item7 " data-menu1="soa-performance">
+
+                            <a href="http://www.netis.com/soa-performance"><span>SOA性能监控解决方案</span></a>
+
+                        </div>
+
+                        <div class="item item8 " data-menu1="spvd">
+
+                            <a href="http://www.netis.com/spvd"><span>SPVD</span></a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="item item4 " data-menu0="services">
+
+                <a href="http://www.netis.com/support">技术与服务</a>
+
+                <div class="subHolder">
+
+                    <div class="menu">
+
+                        <div class="item item0 " data-menu1="support">
+
+                            <a href="http://www.netis.com/support"><span>服务支持</span></a>
+
+                        </div>
+
+                        <div class="item item1 " data-menu1="certification">
+
+                            <a href="http://www.netis.com/crossflow">认证培训</a>
+
+                            <div class="subHolder">
+
+                                <div class="menu">
+
+                                    <div class="item item0 " data-menu2="netis-crossflow">
+
+                                        <a href="http://www.netis.com/crossflow"><span>Netis CrossFlow 产品认证 </span></a>
+
+                                    </div>
+
+                                    <div class="item item1 " data-menu2="tcp-ip">
+
+                                        <a href="http://www.netis.com/tcp-ip"><span>TCP/IP原理与故障诊断</span></a>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="item item3 " data-menu1="search">
+
+                            <a href="http://www.netis.com/search"><span>客户授权许可信息查询</span></a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="item item5 " data-menu0="resources">
+
+                <a href="http://www.netis.com/flows" target="_blank">资料分享 </a>
+
+                <div class="subHolder">
+
+                    <div class="menu">
+
+                        <div class="item item0 " data-menu1="flows">
+
+                            <a class="external" href="http://www.netis.com/flows" target="_blank"><span>Flows</span></a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="item item6 " data-menu0="partners">
+
+                <a href="http://www.netis.com/partners"><span>渠道合作 </span></a>
+
+            </div>
+
+            <div class="item item7 " data-menu0="global-partners">
+
+                <a href="http://www.netis.com/global-partners"><span>合作伙伴</span></a>
+
+            </div>
+
+            <div class="item item8 " data-menu0="recruitment">
+
+                <a href="http://www.netis.com/job-list">招纳贤士 </a>
+
+                <div class="subHolder">
+
+                    <div class="menu">
+
+                        <div class="item item0 " data-menu1="job-list">
+
+                            <a href="http://www.netis.com/job-list"><span>职位发布</span></a>
+
+                        </div>
+
+                        <div class="item item1 " data-menu1="bg-list">
+
+                            <a href="http://www.netis.com/bg-list"><span>办公环境</span></a>
+
+                        </div>
+
+                        <div class="item item2 " data-menu1="yg-list">
+
+                            <a href="http://www.netis.com/yg-list"><span>员工风采</span></a>
+
+                        </div>
+
+                        <div class="item item3 " data-menu1="fl-list">
+
+                            <a href="http://www.netis.com/fl-list"><span>福利保障</span></a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="item item9 " data-menu0="about-us">
+
+                <a href="http://www.netis.com/about-us">关于我们</a>
+
+                <div class="subHolder">
+
+                    <div class="menu">
+
+                        <div class="item item0 " data-menu1="about-us">
+
+                            <a href="http://www.netis.com/about-us"><span>关于天旦</span></a>
+
+                        </div>
+
+                        <div class="item item1 " data-menu1="news">
+
+                            <a href="http://www.netis.com/news-list"><span>新闻中心</span></a>
+
+                        </div>
+
+                        <div class="item item2 " data-menu1="contact">
+
+                            <a href="http://www.netis.com/contact"><span>联系我们</span></a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <div id="main">
+
+        <div class="particles_block">
+
+            <div id="particles" style="width:100%"></div>
+
+            <div id="particles_blue" style="width:100%"></div>
+
+        </div>
+
+        <div id="bgImage">
+
+            <div class="text"></div>
+
+            <div class="white"></div>
+
+            <div class="white2"></div>
+
+            <div class="blue"></div>
+
+            <div class="blue2"></div>
+
+        </div>
+
+        <div id="page">
+
+            <!-- page id 1 -->
+
+            <!-- page id 1 -->
+            <!-- BANNER-HOME block 100 -->
+            <div class="section dark home">
+                <div class="section_inner">
+                    <div>
+                        <h1 class="h1 fadeGroup up">即刻落地的业务性能管理，</h1>
+                        <h2 class="h2 fadeGroup up stagger500">每天保障着百亿笔交易的顺利达成。</h2>
+                    </div>
+                    <!--
+                    <div class="fadeGroup stagger1000 duration1000">
+                        <a class="button ui contact">联系我们</a>
+                    </div>
+                    -->
+                </div>
+                <div class="downArrow">
+                    <div class="image"></div>
+                </div>
+            </div>
+            <!-- CAROUSEL block 36 -->
+            <div class="section hasCarousel carousel-logos dark bgBlack90-80">
+                <div class="section_inner fadeGroup stagger1000">
+                    <h2 class="h2">他们的核心业务系统保障都选择我们:</h2>
+                    <div class="carousel" data-carouseltype="logos">
+                        <div class="carousel-trigger" data-item="0">
+                            <div class="logoHolder logos">
+                                <img class="logo" src="http://www.netis.com/wp-content/themes/netis/img/logos/logos_zgyl.png">
+                                <div class="titleHolder">
+                                    <p class="title">中国银联</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="carousel-trigger" data-item="1">
+                            <div class="logoHolder logos">
+                                <img class="logo" src="http://www.netis.com/wp-content/themes/netis/img/logos/20160510144507_208.png">
+                                <div class="titleHolder">
+                                    <p class="title">农业银行</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="carousel-trigger" data-item="2">
+                            <div class="logoHolder logos">
+                                <img class="logo" src="http://www.netis.com/wp-content/themes/netis/img/logos/logos_cmb.png">
+                                <div class="titleHolder">
+                                    <p class="title">招商银行</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="carousel-trigger" data-item="3">
+                            <div class="logoHolder logos">
+                                <img class="logo" src="http://www.netis.com/wp-content/themes/netis/img/logos/logos_msyh.png">
+                                <div class="titleHolder">
+                                    <p class="title">民生银行</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="carousel-trigger" data-item="4">
+                            <div class="logoHolder logos">
+                                <img class="logo" src="http://www.netis.com/wp-content/themes/netis/img/logos/logos_gdyh.png">
+                                <div class="titleHolder">
+                                    <p class="title">光大银行</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="carousel-trigger" data-item="5">
+                            <div class="logoHolder logos">
+                                <img class="logo" src="http://www.netis.com/wp-content/themes/netis/img/logos/20160510144449_273.png">
+                                <div class="titleHolder">
+                                    <p class="title">恒丰银行</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="carousel-trigger" data-item="6">
+                            <div class="logoHolder logos">
+                                <img class="logo" src="http://www.netis.com/wp-content/themes/netis/img/logos/logos_njyh.png">
+                                <div class="titleHolder">
+                                    <p class="title">南京银行</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="carousel-trigger" data-item="7">
+                            <div class="logoHolder logos">
+                                <img class="logo" src="http://www.netis.com/wp-content/themes/netis/img/logos/logos_bsyh.png">
+                                <div class="titleHolder">
+                                    <p class="title">包商银行</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="carousel-trigger" data-item="8">
+                            <div class="logoHolder logos">
+                                <img class="logo" src="http://www.netis.com/wp-content/themes/netis/img/logos/logos_sdcsh.png">
+                                <div class="titleHolder">
+                                    <p class="title">山东城商行联盟</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="carousel-trigger" data-item="9">
+                            <div class="logoHolder logos">
+                                <img class="logo" src="http://www.netis.com/wp-content/themes/netis/img/logos/logos_gtja.png">
+                                <div class="titleHolder">
+                                    <p class="title">国泰君安</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="carousel-trigger" data-item="10">
+                            <div class="logoHolder logos">
+                                <img class="logo" src="http://www.netis.com/wp-content/themes/netis/img/logos/logos_gdyd.png">
+                                <div class="titleHolder">
+                                    <p class="title">广东移动</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="connector">
+                        <div class="connector-inner">
+                            <div class="connector-refresh">
+                                <div class="left"></div>
+                                <div class="right"></div>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                        <h4>CrossFlow 监控和保障的业务</h4>
+                    </div>
+                    <div class="carousel-textHolder quote">
+                        <div class="text carousel-target  show relative" data-item="0">
+                            <p><span class="start"></span>BPC保障其转接、多渠道、收单及国际业务等多项一类业务系统<span class="end"></span></p>
+                            <div class="buttonBottomHolder">
+                                <a class="button goCase" href="http://www.netis.com/case-studies">了解更多</a>
+                            </div>
+                        </div>
+                        <div class="text carousel-target  " data-item="1">
+                            <p><span class="start"></span>BPC保障其大机监控、大机下移开放战略、银监会121号文数据上报、运维/行长报表平台<span class="end"></span></p>
+                            <div class="buttonBottomHolder">
+                                <a class="button goCase" href="http://www.netis.com/case-studies">了解更多</a>
+                            </div>
+                        </div>
+                        <div class="text carousel-target  " data-item="2">
+                            <p><span class="start"></span>保障其2代、3代核心银行系统，以及信用卡授权、银联、支付宝、三方存管、网银等30套一类保障业务系统<span class="end"></span></p>
+                            <div class="buttonBottomHolder">
+                                <a class="button goCase" href="http://www.netis.com/case-studies">了解更多</a>
+                            </div>
+                        </div>
+                        <div class="text carousel-target  " data-item="3">
+                            <p><span class="start"></span>保障其核心银行，以及柜面现金存款、网银跨行转账、银联支付、网银互联、信用卡、手机银行等35套一类保障业务系统<span class="end"></span></p>
+                            <div class="buttonBottomHolder">
+                                <a class="button goCase" href="http://www.netis.com/case-studies">了解更多</a>
+                            </div>
+                        </div>
+                        <div class="text carousel-target  " data-item="4">
+                            <p><span class="start"></span>保障其银联、信用卡V+、信用卡VMX、ECIF、总行前置人行身份核查、人行个人征信、电子支付等19套一类业务系统<span class="end"></span></p>
+                            <div class="buttonBottomHolder">
+                                <a class="button goCase" href="http://www.netis.com/case-studies">了解更多</a>
+                            </div>
+                        </div>
+                        <div class="text carousel-target  " data-item="5">
+                            <p><span class="start"></span>保障其网银 、卡交易系统 、网银互联、OA、基金、黄金、中间业务、柜面、国际结算、二代支付、村镇银行、Gaps、身份核查、征信系统、金融资产网络交易平台、微信银行等超过 40 套业务系统<span class="end"></span></p>
+                            <div class="buttonBottomHolder">
+                                <a class="button goCase" href="http://www.netis.com/case-studies">了解更多</a>
+                            </div>
+                        </div>
+                        <div class="text carousel-target  " data-item="6">
+                            <p><span class="start"></span>保障其网银、柜面、ATM、人行二代支付、超级网银、银联等11套一类保障业务系统<span class="end"></span></p>
+                            <div class="buttonBottomHolder">
+                                <a class="button goCase" href="http://www.netis.com/case-studies">了解更多</a>
+                            </div>
+                        </div>
+                        <div class="text carousel-target  " data-item="7">
+                            <p><span class="start"></span>保障其核心银行、柜面现金存款、网银跨行转账、对公、对私前置、银联支付、银联、网银互联、安全平台50套一类保障业务系统<span class="end"></span></p>
+                            <div class="buttonBottomHolder">
+                                <a class="button goCase" href="http://www.netis.com/case-studies">了解更多</a>
+                            </div>
+                        </div>
+                        <div class="text carousel-target  " data-item="8">
+                            <p><span class="start"></span>保障其核心银行系统CBOD；联盟ESB；成员行ESB；Xbus支付平台，网银，柜面，手机银行，二代支付 ，银联等多套一类保障业务系统<span class="end"></span></p>
+                            <div class="buttonBottomHolder">
+                                <a class="button goCase" href="http://www.netis.com/case-studies">了解更多</a>
+                            </div>
+                        </div>
+                        <div class="text carousel-target  " data-item="9">
+                            <p><span class="start"></span>保障其集中交易、VIP快速交易、网上交易、报盘、融资融券、个股期权等多套一类保障业务系统<span class="end"></span></p>
+                            <div class="buttonBottomHolder">
+                                <a class="button goCase" href="http://www.netis.com/case-studies">了解更多</a>
+                            </div>
+                        </div>
+                        <div class="text carousel-target  " data-item="10">
+                            <p><span class="start"></span>保障其NGCRM、融合计费系统、门户网站、短信营业厅、NGBOSS系统的监控部署等多套一类保障业务系统<span class="end"></span></p>
+                            <div class="buttonBottomHolder">
+                                <a class="button goCase" href="http://www.netis.com/case-studies">了解更多</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- BANNER block 1 -->
+            <div class="section banner bgBlack80 dark ">
+                <div class="section_inner">
+                    <div class="productText">
+                        <div class="fadeGroup up">
+                            <h1 class="h1">BPC | 业务性能管理中心</h1>
+                            <p>快速告警，精确定位，实时交易性能可视化，端到端全路径覆盖。 全旁路监控，无需对应用进行改造，对现有生产系统无影响。</p>
+                        </div>
+                        <div class="fadeGroup stagger500 duration1000">
+                            <a class="button asd" href="http://www.netis.com/bpc">了解更多</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="imgWrap">
+                    <img src="http://www.netis.com/wp-content/themes/netis/img/banner/banner_bpc.jpg">
+                </div>
+                <div class="imgPlaceholder">
+                    <img src="http://www.netis.com/wp-content/themes/netis/img/banner/banner_bpc.jpg">
+                </div>
+            </div>
+            <!-- BANNER block 12 -->
+            <div class="section banner bgBlack80 dark right">
+                <div class="section_inner">
+                    <div class="productText">
+                        <div class="fadeGroup up">
+                            <h1 class="h1">NPM | 网络性能管理</h1>
+                            <p>全网流量可视化，精确告警定位，以服务为导向的新一代网络性能管理 。</p>
+                        </div>
+                        <div class="fadeGroup stagger500 duration1000">
+                            <a class="button asd" href="http://www.netis.com/npm">了解更多</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="imgWrap">
+                    <img src="http://www.netis.com/wp-content/themes/netis/img/banner/banner_npm.jpg">
+                </div>
+                <div class="imgPlaceholder">
+                    <img src="http://www.netis.com/wp-content/themes/netis/img/banner/banner_npm.jpg">
+                </div>
+            </div>
+            <!-- BANNER block 24 -->
+            <div class="section banner bgWhite ">
+                <div class="section_inner">
+                    <div class="productText">
+                        <div class="fadeGroup up">
+                            <h1 class="h1">SPVD | 服务路径视图发现</h1>
+                            <p>全旁路，自动发现应用组件、交付设备之间的连接性和访问关系，快速创建服务路径视图。</p>
+                        </div>
+                        <div class="fadeGroup stagger500 duration1000">
+                            <a class="button asd" href="http://www.netis.com/spvd">了解更多</a>
+                        </div>
+                    </div>
+                </div>
+                <div id="wrap" class="wrap imgWrap">
+                    <div class="mockup">
+                        <img class="mockup__img" src="http://www.netis.com/wp-content/themes/netis/img/banner/banner_spvd.jpg" />
+                        <div id="mobile" class="mobile">
+                            <ul id="slideshow" class="slideshow">
+                                <li class="slideshow__item"><img src="http://www.netis.com/wp-content/themes/netis/img/products/products_spvd-auto-discover_zh.png" /></li>
+                                <li class="slideshow__item"><img src="http://www.netis.com/wp-content/themes/netis/img/products/products_spvd-auto-card_zh.png" /></li>
+                                <li class="slideshow__item"><img src="http://www.netis.com/wp-content/themes/netis/img/products/products_spvd-roadmap_zh.png" /></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="wrap imgPlaceholder"></div>
+            </div>
+            <script src="http://www.netis.com/wp-content/themes/netis/js/MockupSlideshow/js/classie.js"></script>
+            <script src="http://www.netis.com/wp-content/themes/netis/js/MockupSlideshow/js/main.js"></script>
+            <!-- OFFICE-MAP block 101 -->
+            <div class="section dark bgBlack65">
+                <div class="section_inner">
+                    <h2 class="h2 center fadeGroup stagger500 up">我们的办公地址</h2>
+                    <div class="map fadeGroup">
+                        <a href="http://www.netis.com/contact">
+                            <img src="http://www.netis.com/wp-content/themes/netis/img/map/map-netis.png">
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!-- JOBS-LIST-SHORT block 87 -->
+            <div class="section slide jobs-list short buttons buttons4 bgWhite">
+                <div class="section_inner">
+                    <h2 class="h2 center">现正招聘</h2>
+                    <div class="itemHolder">
+                        <div class="item main fadeGroup">
+                            <div class="buttons-buttonsHolder">
+                                <a class="button buttons-trigger ui on" data-item="1"> 开发工程师</a>
+                                <a class="button buttons-trigger ui " data-item="2">产品</a>
+                                <a class="button buttons-trigger ui " data-item="3">业务</a>
+                                <a class="button buttons-trigger ui " data-item="4">工程</a>
+                                <div class="clearfix"></div>
+                            </div>
+                            <div class="buttons-textHolder">
+
+                                <div class="text buttons-target show relative" data-item="1">
+                                	
+                                    <div class="job job-dv">
+                                        <img class="cityIcon" src="http://www.netis.com/wp-content/themes/netis/img/cities/cities_shanghai.png">
+                                        <h4>Java开发工程师</h4>
+                                        <p>上海 - 开发工程师</p>
+                                        <a class="button asd" href="http://www.netis.com/job/java-developer-shanghai">查看完整介绍</a>
+                                    </div>
+
+                                    <div class="job job-dv">
+                                        <img class="cityIcon" src="http://www.netis.com/wp-content/themes/netis/img/cities/cities_shanghai.png">
+                                        <h4>WEB前端开发工程师</h4>
+                                        <p>上海 - 开发工程师</p>
+                                        <a class="button asd" href="http://www.netis.com/job/web-frontend-developer-shanghai">查看完整介绍</a>
+                                    </div>
+
+                                    <div class="job job-dv">
+                                        <img class="cityIcon" src="http://www.netis.com/wp-content/themes/netis/img/cities/cities_shanghai.png">
+                                        <h4>Python开发工程师</h4>
+                                        <p>上海 - 开发工程师</p>
+                                        <a class="button asd" href="http://www.netis.com/job/python-developer-shanghai">查看完整介绍</a>
+                                    </div>
+
+                                    <div class="job job-dv">
+                                        <img class="cityIcon" src="http://www.netis.com/wp-content/themes/netis/img/cities/cities_shanghai.png">
+                                        <h4>C/C++开发工程师</h4>
+                                        <p>上海 - 开发工程师</p>
+                                        <a class="button asd" href="http://www.netis.com/job/cc%e5%bc%80%e5%8f%91%e5%b7%a5%e7%a8%8b%e5%b8%88">查看完整介绍</a>
+                                    </div>
+
+                                </div>
+                                <div class="text buttons-target" data-item="2">
+                                	
+                                    <div class="job job-pd">
+                                        <img class="cityIcon" src="http://www.netis.com/wp-content/themes/netis/img/cities/cities_beijing.png">
+                                        <h4>技术支持/顾问</h4>
+                                        <p>北京 - 产品</p>
+                                        <a class="button asd" href="http://www.netis.com/job/tech-support-beijing">查看完整介绍</a>
+                                    </div>
+
+                                    <div class="job job-pd">
+                                        <img class="cityIcon" src="http://www.netis.com/wp-content/themes/netis/img/cities/cities_shanghai.png">
+                                        <h4>技术支持/顾问</h4>
+                                        <p>上海 - 产品</p>
+                                        <a class="button asd" href="http://www.netis.com/job/tech-support-shanghai">查看完整介绍</a>
+                                    </div>
+
+                                    <div class="job job-pd">
+                                        <img class="cityIcon" src="http://www.netis.com/wp-content/themes/netis/img/cities/cities_beijing.png">
+                                        <h4>服务工程师</h4>
+                                        <p>北京 - 产品</p>
+                                        <a class="button asd" href="http://www.netis.com/job/%e6%9c%8d%e5%8a%a1%e5%b7%a5%e7%a8%8b%e5%b8%88">查看完整介绍</a>
+                                    </div>
+
+                                    <div class="job job-pd">
+                                        <img class="cityIcon" src="http://www.netis.com/wp-content/themes/netis/img/cities/cities_shanghai.png">
+                                        <h4>服务工程师</h4>
+                                        <p>上海 - 产品</p>
+                                        <a class="button asd" href="http://www.netis.com/job/%e6%9c%8d%e5%8a%a1%e5%b7%a5%e7%a8%8b%e5%b8%88-2">查看完整介绍</a>
+                                    </div>
+
+                                </div>
+                                <div class="text buttons-target" data-item="3">
+                                	
+                                    <div class="job job-bs">
+                                        <img class="cityIcon" src="http://www.netis.com/wp-content/themes/netis/img/cities/cities_beijing.png">
+                                        <h4>大客户经理</h4>
+                                        <p>北京 - 业务</p>
+                                        <a class="button asd" href="http://www.netis.com/job/account-manager-beijing">查看完整介绍</a>
+                                    </div>
+
+                                    <div class="job job-bs">
+                                        <img class="cityIcon" src="http://www.netis.com/wp-content/themes/netis/img/cities/cities_shanghai.png">
+                                        <h4>大客户经理</h4>
+                                        <p>上海 - 业务</p>
+                                        <a class="button asd" href="http://www.netis.com/job/account-manager-shanghai">查看完整介绍</a>
+                                    </div>
+
+                                </div>
+                                <div class="text buttons-target" data-item="4">
+                                	
+                                    <div class="job job-po">
+                                        <img class="cityIcon" src="http://www.netis.com/wp-content/themes/netis/img/cities/cities_shanghai.png">
+                                        <h4>测试工程师</h4>
+                                        <p>上海 - 工程</p>
+                                        <a class="button asd" href="http://www.netis.com/job/test-engineer-shanghai">查看完整介绍</a>
+                                    </div>
+
+                                </div>
+                                <div class="text buttons-target placeholder">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="buttonBottomHolder">
+                        <a class="button asd" href="http://www.netis.com/job-list">任职于上海天旦</a>
+                        <a class="button asd" href="http://www.netis.com/job-list">查看所有职位</a>
+                    </div>
+                </div>
+            </div>
+                        <div class="section dark contact bgBlack80-80">
+                <div class="section_inner">
+                    <div class="column left fadeGroup">
+                        <h2 class="h2">联系我们</h2>
+						<div role="form" class="wpcf7" id="wpcf7-f68-o1" lang="zh-CN" dir="ltr">
+<div class="screen-reader-response"></div>
+<form action="/#wpcf7-f68-o1" method="post" class="wpcf7-form" novalidate="novalidate">
+<div style="display: none;">
+<input type="hidden" name="_wpcf7" value="68" />
+<input type="hidden" name="_wpcf7_version" value="4.6" />
+<input type="hidden" name="_wpcf7_locale" value="zh_CN" />
+<input type="hidden" name="_wpcf7_unit_tag" value="wpcf7-f68-o1" />
+<input type="hidden" name="_wpnonce" value="1c1ba7708d" />
+</div>
+<p><span class="wpcf7-form-control-wrap fullname"><input type="text" name="fullname" value="" size="40" class="wpcf7-form-control wpcf7-text wpcf7-validates-as-required" aria-required="true" aria-invalid="false" placeholder="姓名" /></span></p>
+<p><span class="wpcf7-form-control-wrap company"><input type="text" name="company" value="" size="40" class="wpcf7-form-control wpcf7-text" aria-invalid="false" placeholder="公司名称" /></span></p>
+<p><span class="wpcf7-form-control-wrap position"><input type="text" name="position" value="" size="40" class="wpcf7-form-control wpcf7-text" aria-invalid="false" placeholder="工作职位" /></span></p>
+<p><span class="wpcf7-form-control-wrap email"><input type="email" name="email" value="" size="40" class="wpcf7-form-control wpcf7-text wpcf7-email wpcf7-validates-as-required wpcf7-validates-as-email" aria-required="true" aria-invalid="false" placeholder="电子邮件" /></span></p>
+<p><span class="wpcf7-form-control-wrap contactTel"><input type="text" name="contactTel" value="" size="40" class="wpcf7-form-control wpcf7-text" aria-invalid="false" placeholder="联系方式" /></span></p>
+<p><span class="wpcf7-form-control-wrap reasonNote"><textarea name="reasonNote" cols="40" rows="10" class="wpcf7-form-control wpcf7-textarea" aria-invalid="false" placeholder="您想要了解的信息"></textarea></span></p>
+<p><label><span class="wpcf7-form-control-wrap allow"><span class="wpcf7-form-control wpcf7-checkbox wpcf7-exclusive-checkbox" id="ui-rc-allow"><span class="wpcf7-list-item first last"><input type="checkbox" name="allow" value="yes" checked="checked" /><span class="wpcf7-list-item-label">yes</span></span></span></span>希望我们主动联系您</label></p>
+<p><input type="submit" value="发送" class="wpcf7-form-control wpcf7-submit button submit ui" /></p>
+<div class="wpcf7-response-output wpcf7-display-none"></div></form></div>
+                    </div>
+                    <div class="column right ">
+                        <div class="fadeGroup stagger500">
+                            <h2 class="h2">在线咨询</h2>
+                            <p>马上与我们的销售代表取得联系，了解更多CrossFlow产品性能以及如何提升您的业务。</p>
+                            <a class="button ui" id="openChat">在线咨询</a>
+                        </div>
+                        <div class="contactinfo fadeGroup stagger1000 up">
+                            <h3>或通过以下方式联系我们:</h3>
+                            <p>客服电话：<a class="ui" href="tel:400-820-6509">400-820-6509</a></p>
+                            <p>电子邮件：<a class="ui" href="mailto:info@netis.com.cn">info@netis.com</a></p>
+                            <div class="qr">
+                                <img src="http://www.netis.com/wp-content/themes/netis/img/footer/qr-wechat.jpg">
+                                <p>微信</p>
+                            </div>
+                            <div class="qr">
+                                <img src="http://www.netis.com/wp-content/themes/netis/img/footer/qr-weibo.jpg">
+                                <p>微博</p>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+
+
+
+            <div id="footer" class="section dark bgBlack">
+                <div id="sitemap">
+                    <div class="section_inner">
+                        <div class="column">
+                            <h4>产品 </h4>
+                            <p><a href="http://www.netis.com/bpc">BPC</a></p>
+                            <p><a href="http://www.netis.com/npm">NPM</a></p>
+                            <h4>用户案例 </h4>
+                            <p><a href="http://www.netis.com/case-studies">用户案例 </a></p>
+                        </div>
+                        <div class="column">
+                            <h4>解决方案 </h4>
+                            <p><a href="http://www.netis.com/city-commercial-bank">城市商业银行</a></p>
+                            <p><a href="http://www.netis.com/rural-credit-cooperatives">农信社、农商行 </a></p>
+                            <p><a href="http://www.netis.com/brokerage-centralized">券商集中交易系统</a></p>
+                            <p><a href="http://www.netis.com/operator-support">运营商业务支撑系统 </a></p>
+                            <p><a href="http://www.netis.com/private-cloud">私有云中的应用性能监控</a></p>
+                            <p><a href="http://www.netis.com/large-data">运维大数据解决方案</a></p>
+                            <p><a href="http://www.netis.com/electronic-channels">电子渠道</a></p>
+                            <p><a href="http://www.netis.com/soa-performance">SOA 性能监控解决方案</a></p>
+                            <p><a href="http://www.netis.com/spvd">SPVD</a></p>
+                        </div>
+                        <div class="column">
+                            <h4>技术与服务 </h4>
+                            <p><a href="http://www.netis.com/support">服务支持</a></p>
+                            <p class="green">认证培训</p>
+                            <p class="smaller"><a href="http://www.netis.com/crossflow">Netis CrossFlow 产品认证 </a></p>
+                            <p class="smaller"><a href="http://www.netis.com/tcp-ip">TCP/IP原理与故障诊断</a></p>
+                            <p><a href="http://www.netis.com/search"><span>客户授权许可信息查询</span></a></p>
+                        </div>
+                        <div class="column">
+                            <h4>资料分享 </h4>
+                            <p><a class="external" href="http://www.netis.com/flows" target="_blank">Flows</a></p>
+                            <h4>渠道合作 </h4>
+                            <p><a href="http://www.netis.com/partners">渠道合作 </a></p>
+                        </div>
+                        <div class="column">
+                            <h4>合作伙伴</h4>
+                            <p><a href="http://www.netis.com/global-partners">合作伙伴</a></p>
+                            <h4>招纳贤士 </h4>
+                            <p><a href="http://www.netis.com/job-list">职位发布</a></p>
+                            <p><a href="http://www.netis.com/bg-list">办公环境</a></p>
+                            <p><a href="http://www.netis.com/yg-list">员工风采</a></p>
+                            <p><a href="http://www.netis.com/fl-list">福利保障</a></p>
+                            <h4>关于我们</h4>
+                            <p><a href="http://www.netis.com/about-us">关于天旦</a></p>
+                            <p><a href="http://www.netis.com/news-list">新闻中心</a></p>
+                            <p><a href="http://www.netis.com/contact">联系我们</a></p>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+                <div id="copyright">
+                    <div class="logo">
+                        <a href="index.htm"><img class="logo" src="http://www.netis.com/wp-content/themes/netis/img/logo/netis_logo_inv.png"></a>
+                    </div>
+                    <div class="text">
+                        <div class="icon icp">
+                            <img class="icon icp" src="http://www.netis.com/wp-content/themes/netis/img/footer/beian.png">
+                        </div>
+                        <div class="text">
+                            <p>沪ICP备11017547 沪公网安备 31011502002368号 ©版权所有 2005-2016 上海天旦网络科技发展有限公司（Netis） </p>
+                        </div>
+                        <div class="icon">
+                            <a class="external" href="http://www.sgs.gov.cn/lz/licenseLink.do?method=licenceView&entyId=2013060715195356" target="_blank"><img class="icon" src="http://www.netis.com/wp-content/themes/netis/img/footer/icon.png"></a>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- //#footer -->
+
+
+        </div><!-- //#page -->
+    </div><!-- //#main -->
+
+
+    <script src="http://www.netis.com/wp-content/themes/netis/js/vendor/jquery.inview.min.js"></script>
+    <script src="http://www.netis.com/wp-content/themes/netis/js/vendor/countUp.min.js"></script>
+    <script src="http://www.netis.com/wp-content/themes/netis/js/vendor/slick/slick.min.js"></script>
+    <script src="http://www.netis.com/wp-content/themes/netis/js/main.js"></script>
+    <script src="http://www.netis.com/wp-content/themes/netis/js/ajaxpages.js"></script>
+    <script src="http://www.netis.com/wp-content/themes/netis/js/forms/forms.js"></script>
+    <script src="http://www.netis.com/wp-content/themes/netis/js/MockupSlideshow/js/classie.js"></script>
+    <script src="http://www.netis.com/wp-content/themes/netis/js/vendor/jquery.placeholder.min.js"></script>
+    <script>
+        $('input, textarea').placeholder();
+    </script>
+    <script src="http://www.netis.com/wp-content/themes/netis/js/vendor/fastclick.js"></script>
+    <script>
+    window.addEventListener('load', function() {
+        new FastClick(document.body);
+    }, false);
+    </script>
+    <script src="http://www.netis.com/wp-content/themes/netis/js/particles/particles.js"></script>
+    <script src="http://www.netis.com/wp-content/themes/netis/js/MockupSlideshow/js/main.js"></script>
+    <!-- JQUERY FILE UPLOAD -->
+    <!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
+    <link rel="stylesheet" href="http://www.netis.com/wp-content/themes/netis/js/vendor/jQuery-File-Upload-9.10.0/css/jquery.fileupload.css">
+    <!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
+    <script src="http://www.netis.com/wp-content/themes/netis/js/vendor/jQuery-File-Upload-9.10.0/js/vendor/jquery.ui.widget.js"></script>
+    <!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
+    <script src="http://www.netis.com/wp-content/themes/netis/js/vendor/jQuery-File-Upload-9.10.0/js/jquery.iframe-transport.js"></script>
+    <!-- The basic File Upload plugin -->
+    <script src="http://www.netis.com/wp-content/themes/netis/js/vendor/jQuery-File-Upload-9.10.0/js/jquery.fileupload.js"></script>
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-75983945-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+    <script type='text/javascript' src='http://www.netis.com/wp-content/plugins/contact-form-7/includes/js/jquery.form.min.js?ver=3.51.0-2014.06.20'></script>
+<script type='text/javascript'>
+/* <![CDATA[ */
+var _wpcf7 = {"recaptcha":{"messages":{"empty":"\u8bf7\u9a8c\u8bc1\u60a8\u4e0d\u662f\u4e00\u4e2a\u673a\u5668\u4eba"}}};
+/* ]]> */
+</script>
+<script type='text/javascript' src='http://www.netis.com/wp-content/plugins/contact-form-7/includes/js/scripts.js?ver=4.6'></script>
+<script type='text/javascript' src='http://www.netis.com/wp-includes/js/wp-embed.min.js?ver=4.7'></script>
+
+    </body>
+
+</html>

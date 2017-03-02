@@ -1,0 +1,994 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!-- saved from url=(0062)http://www.blogjava.net/yongboy/archive/2015/04/14/424413.html -->
+<html><head id="Head"><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>
+	随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava
+</title><meta id="metaKeywords" name="keywords" content="随手记之TCP Keepalive笔记"><link type="text/css" rel="stylesheet" href="./随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava_files/common.css"><link id="MainCss" type="text/css" rel="stylesheet" href="./随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava_files/style.css"><link id="SecondaryCss" type="text/css" rel="stylesheet" href="./随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava_files/customcss.aspx"><link id="RSSLink" title="RSS" type="application/rss+xml" rel="alternate" href="http://www.blogjava.net/yongboy/rss.aspx"><script src="./随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava_files/osd.js.下载"></script><script src="./随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava_files/ads"></script><script src="./随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava_files/pubads_impl_110.js.下载" async=""></script><link rel="prefetch" href="http://tpc.googlesyndication.com/safeframe/1-0-6/html/container.html"></head>
+<body>
+    <form name="Form1" method="post" action="http://www.blogjava.net/yongboy/archive/2015/04/14/424413.html" id="Form1">
+<div>
+<input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="">
+<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="">
+<input type="hidden" name="__VIEWSTATE" id="
+__VIEWSTATE" value="">
+</div>
+
+<script type="text/javascript" async="" src="./随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava_files/ga.js.下载"></script><script async="" type="text/javascript" src="./随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava_files/gpt.js.下载"></script><script type="text/javascript">
+//<![CDATA[
+var theForm = document.forms['Form1'];
+if (!theForm) {
+    theForm = document.Form1;
+}
+function __doPostBack(eventTarget, eventArgument) {
+    if (!theForm.onsubmit || (theForm.onsubmit() != false)) {
+        theForm.__EVENTTARGET.value = eventTarget;
+        theForm.__EVENTARGUMENT.value = eventArgument;
+        theForm.submit();
+    }
+}
+//]]>
+</script>
+
+
+<script src="./随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava_files/WebResource.axd" type="text/javascript"></script>
+
+<script language="JavaScript">
+									function ctlent(evt,id)
+											{
+												if(evt.ctrlKey && evt.keyCode == 13)
+												{	
+													try
+													{
+														TempSave(id);
+													}
+													catch(ex)
+													{
+													}
+													finally
+													{
+													    __doPostBack('AjaxHolder$PostComment$btnSubmit','')
+													}
+												}
+		
+												}</script>
+												<script language="JavaScript">function SetReplyAuhor(author){document.getElementById('AjaxHolder_PostComment_tbComment').value+="@"+author+"\n";document.getElementById('AjaxHolder_PostComment_tbComment').focus();return false}</script>
+<script src="./随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava_files/ScriptResource.axd" type="text/javascript"></script>
+<script src="./随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava_files/ScriptResource(1).axd" type="text/javascript"></script>
+        <link rel="stylesheet" href="./随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava_files/default.min.css">
+<script src="./随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava_files/highlight.min.js.下载"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<h1><a id="Header1_HeaderTitle" class="headermaintitle" href="http://www.blogjava.net/yongboy/">聂永的博客</a></h1>
+<p id="tagline">记录工作/学习的点点滴滴。</p>
+			<div id="main">
+				
+					
+	<div class="post">
+		<h2>
+			<a id="viewpost1_TitleUrl" href="http://www.blogjava.net/yongboy/archive/2015/04/14/424413.html">随手记之TCP Keepalive笔记</a>
+		</h2>
+		<div class="postText"><div class="wrap"> <h3 id="-">零。前言</h3> <p>TCP是无感知的虚拟连接，中间断开两端不会立刻得到通知。一般在使用长连接的环境下，需要心跳保活机制可以勉强感知其存活。业务层面有心跳机制，TCP协议也提供了心跳保活机制。</p> <h3 id="-tcp-keepalive-">一。TCP Keepalive解读</h3> <p>长连接的环境下，人们一般使用业务层面或上层应用层协议（诸如MQTT，SOCKET.IO等）里面定义和使用。一旦有热数据需要传递，若此时连接已经被中介设备断开，应用程序没有及时感知的话，那么就会导致在一个无效的数据链路层面发送业务数据，结果就是发送失败。</p> <p><img src="./随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava_files/111.png" alt=""></p> <p>无论是因为客户端意外断电、死机、崩溃、重启，还是中间路由网络无故断开、NAT超时等，服务器端要做到快速感知失败，减少无效链接操作。</p> <h4 id="1-">1. 交互过程</h4> <p><img src="./随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava_files/151.png" alt=""></p> <h4 id="2-">2. 协议解读</h4> <p>下面协议解读，基于<a href="https://tools.ietf.org/html/rfc1122#section-4.2.3.6">RFC1122#TCP Keep-Alives</a>。</p> <ol> <li>TCP Keepalive虽不是标准规范，但操作系统一旦实现，默认情况下须为关闭，可以被上层应用开启和关闭。</li> <li>TCP Keepalive必须在没有任何数据（包括ACK包）接收之后的周期内才会被发送，允许配置，默认值不能够小于2个小时</li> <li>不包含数据的ACK段在被TCP发送时没有可靠性保证，意即一旦发送，不确保一定发送成功。系统实现不能对任何特定探针包作死连接对待</li> <li>规范建议keepalive保活包不应该包含数据，但也可以包含1个无意义的字节，比如0x0。</li> <li>SEG.SEQ = SND.NXT-1，即TCP保活探测报文序列号将前一个TCP报文序列号减1。SND.NXT = RCV.NXT，即下一次发送正常报文序号等于ACK序列号；总之保活报文不在窗口控制范围内 有一张图，可以很容易说明，但请仔细观察Tcp Keepalive部分：</li> </ol> <p><img src="./随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava_files/image_thumb_2.png" alt=""></p> <ol> <li>不太好的TCP堆栈实现，可能会要求保活报文必须携带有1个字节的数据负载</li> <li>TCP Keepalive应该在服务器端启用，客户端不做任何改动；若单独在客户端启用，若客户端异常崩溃或出现连接故障，存在服务器无限期的为已打开的但已失效的文件描述符消耗资源的严重问题。但在特殊的NFS文件系统环境下，需要客户端和服务器端都要启用Tcp Keepalive机制。</li> <li>TCP Keepalive不是TCP规范的一部分，有三点需要注意：<ul> <li>在短暂的故障期间，它们可能引起一个良好连接（good connection）被释放（dropped）</li> <li>它们消费了不必要的宽带</li> <li>在以数据包计费的互联网消费（额外）花费金钱</li> </ul> </li> </ol> <h3 id="-tcp-keepalive-">二。Tcp keepalive 如何使用</h3> <p>以下环境是在Linux服务器上进行。应用程序若想使用，需要设置SO_KEEPALIVE套接口选项才能够生效。</p> <h4 id="1-">1. 系统内核参数配置</h4> <ol> <li>tcp_keepalive_time，在TCP保活打开的情况下，最后一次数据交换到TCP发送第一个保活探测包的间隔，即允许的持续空闲时长，或者说每次正常发送心跳的周期，默认值为7200s（2h）。</li> <li>tcp_keepalive_probes 在tcp_keepalive_time之后，没有接收到对方确认，继续发送保活探测包次数，默认值为9（次）</li> <li>tcp_keepalive_intvl，在tcp_keepalive_time之后，没有接收到对方确认，继续发送保活探测包的发送频率，默认值为75s。</li> </ol> <p>发送频率tcp_keepalive_intvl乘以发送次数tcp_keepalive_probes，就得到了从开始探测到放弃探测确定连接断开的时间</p> <p>若设置，服务器在客户端连接空闲的时候，每90秒发送一次保活探测包到客户端，若没有及时收到客户端的TCP Keepalive ACK确认，将继续等待15秒*2=30秒。总之可以在90s+30s=120秒（两分钟）时间内可检测到连接失效与否。</p> <p>以下改动，需要写入到/etc/sysctl.conf文件：</p> <pre><code class="hljs">net<span class="hljs-class">.ipv4</span><span class="hljs-class">.tcp_keepalive_time</span>=<span class="hljs-number">90</span>
+net<span class="hljs-class">.ipv4</span><span class="hljs-class">.tcp_keepalive_intvl</span>=<span class="hljs-number">15</span>
+net<span class="hljs-class">.ipv4</span><span class="hljs-class">.tcp_keepalive_probes</span>=<span class="hljs-number">2</span>
+</code></pre><p>保存退出，然后执行<code>sysctl -p</code>生效。可通过 <code>sysctl -a | grep keepalive</code> 命令检测一下是否已经生效。</p>
+<blockquote>
+<p>针对已经设置SO_KEEPALIVE的套接字，应用程序不用重启，内核直接生效。</p>
+</blockquote>
+<h4 id="2-java-netty-">2. Java/netty服务器如何使用</h4>
+<p>只需要在服务器端一方设置即可，客户端完全不用设置，比如基于netty 4服务器程序：</p>
+<pre><code class="hljs java">ServerBootstrap b = <span class="hljs-keyword"><span class="hljs-keyword">new</span></span> ServerBootstrap();
+            b.group(bossGroup, workerGroup)
+             .channel(NioServerSocketChannel.class)
+             .option(ChannelOption.SO_BACKLOG, <span class="hljs-number"><span class="hljs-number">100</span></span>)
+             .childOption(ChannelOption.SO_KEEPALIVE, <span class="hljs-keyword"><span class="hljs-keyword">true</span></span>)
+             .handler(<span class="hljs-keyword"><span class="hljs-keyword">new</span></span> LoggingHandler(LogLevel.INFO))
+             .childHandler(<span class="hljs-keyword"><span class="hljs-keyword">new</span></span> ChannelInitializer&lt;SocketChannel&gt;() {
+                 <span class="hljs-annotation"><span class="hljs-meta">@Override</span></span>
+                 <span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">void</span></span></span><span class="hljs-function"> </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">initChannel</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">(SocketChannel ch)</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">throws</span></span></span><span class="hljs-function"> Exception </span></span>{
+                     ch.pipeline().addLast(
+                             <span class="hljs-keyword"><span class="hljs-keyword">new</span></span> EchoServerHandler());
+                 }
+             });
+
+            <span class="hljs-comment"><span class="hljs-comment">// Start the server.</span></span>
+            ChannelFuture f = b.bind(port).sync();
+
+            <span class="hljs-comment"><span class="hljs-comment">// Wait until the server socket is closed.</span></span>
+            f.channel().closeFuture().sync();
+</code></pre><p>Java程序只能做到设置SO_KEEPALIVE选项，至于TCP_KEEPCNT，TCP_KEEPIDLE，TCP_KEEPINTVL等参数配置，只能依赖于sysctl配置，系统进行读取。</p>
+<h4 id="3-c-">3. C语言如何设置</h4>
+<p>下面代码摘取自libkeepalive源码，C语言可以设置更为详细的TCP内核参数。</p>
+<pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">int</span></span></span><span class="hljs-function"> </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">socket</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">(</span></span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-params"><span class="hljs-keyword">int</span></span></span></span><span class="hljs-function"><span class="hljs-params"> domain, </span></span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-params"><span class="hljs-keyword">int</span></span></span></span><span class="hljs-function"><span class="hljs-params"> type, </span></span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-params"><span class="hljs-keyword">int</span></span></span></span><span class="hljs-function"><span class="hljs-params"> protocol)</span></span></span><span class="hljs-function">
+</span></span>{
+  <span class="hljs-keyword"><span class="hljs-keyword">int</span></span> (*libc_socket)(<span class="hljs-keyword"><span class="hljs-keyword">int</span></span>, <span class="hljs-keyword"><span class="hljs-keyword">int</span></span>, <span class="hljs-keyword"><span class="hljs-keyword">int</span></span>);
+  <span class="hljs-keyword"><span class="hljs-keyword">int</span></span> s, optval;
+  <span class="hljs-keyword"><span class="hljs-keyword">char</span></span> *env;
+
+  *(<span class="hljs-keyword"><span class="hljs-keyword">void</span></span> **)(&amp;libc_socket) = dlsym(RTLD_NEXT, <span class="hljs-string"><span class="hljs-string">"socket"</span></span>);
+  <span class="hljs-keyword"><span class="hljs-keyword">if</span></span>(dlerror()) {
+    errno = EACCES;
+    <span class="hljs-keyword"><span class="hljs-keyword">return</span></span> <span class="hljs-number">-</span><span class="hljs-number"><span class="hljs-number">1</span></span>;
+  }
+
+  <span class="hljs-keyword"><span class="hljs-keyword">if</span></span>((s = (*libc_socket)(domain, type, protocol)) != <span class="hljs-number">-</span><span class="hljs-number"><span class="hljs-number">1</span></span>) {
+    <span class="hljs-keyword"><span class="hljs-keyword">if</span></span>((domain == PF_INET) &amp;&amp; (type == SOCK_STREAM)) {
+      <span class="hljs-keyword"><span class="hljs-keyword">if</span></span>(!(env = getenv(<span class="hljs-string"><span class="hljs-string">"KEEPALIVE"</span></span>)) || strcasecmp(env, <span class="hljs-string"><span class="hljs-string">"off"</span></span>)) {
+        optval = <span class="hljs-number"><span class="hljs-number">1</span></span>;
+      } <span class="hljs-keyword"><span class="hljs-keyword">else</span></span> {
+        optval = <span class="hljs-number"><span class="hljs-number">0</span></span>;
+      }
+      <span class="hljs-keyword"><span class="hljs-keyword">if</span></span>(!(env = getenv(<span class="hljs-string"><span class="hljs-string">"KEEPALIVE"</span></span>)) || strcasecmp(env, <span class="hljs-string"><span class="hljs-string">"skip"</span></span>)) {
+        setsockopt(s, SOL_SOCKET, SO_KEEPALIVE, &amp;optval, <span class="hljs-keyword"><span class="hljs-keyword">sizeof</span></span>(optval));
+      }
+<span class="hljs-preprocessor"><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> TCP_KEEPCNT</span></span>
+      <span class="hljs-keyword"><span class="hljs-keyword">if</span></span>((env = getenv(<span class="hljs-string"><span class="hljs-string">"KEEPCNT"</span></span>)) &amp;&amp; ((optval = atoi(env)) &gt;= <span class="hljs-number"><span class="hljs-number">0</span></span>)) {
+        setsockopt(s, SOL_TCP, TCP_KEEPCNT, &amp;optval, <span class="hljs-keyword"><span class="hljs-keyword">sizeof</span></span>(optval));
+      }
+<span class="hljs-preprocessor"><span class="hljs-meta">#</span><span class="hljs-keyword"><span class="hljs-meta"><span class="hljs-meta-keyword">endif</span></span></span></span>
+<span class="hljs-preprocessor"><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> TCP_KEEPIDLE</span></span>
+      <span class="hljs-keyword"><span class="hljs-keyword">if</span></span>((env = getenv(<span class="hljs-string"><span class="hljs-string">"KEEPIDLE"</span></span>)) &amp;&amp; ((optval = atoi(env)) &gt;= <span class="hljs-number"><span class="hljs-number">0</span></span>)) {
+        setsockopt(s, SOL_TCP, TCP_KEEPIDLE, &amp;optval, <span class="hljs-keyword"><span class="hljs-keyword">sizeof</span></span>(optval));
+      }
+<span class="hljs-preprocessor"><span class="hljs-meta">#</span><span class="hljs-keyword"><span class="hljs-meta"><span class="hljs-meta-keyword">endif</span></span></span></span>
+<span class="hljs-preprocessor"><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> TCP_KEEPINTVL</span></span>
+      <span class="hljs-keyword"><span class="hljs-keyword">if</span></span>((env = getenv(<span class="hljs-string"><span class="hljs-string">"KEEPINTVL"</span></span>)) &amp;&amp; ((optval = atoi(env)) &gt;= <span class="hljs-number"><span class="hljs-number">0</span></span>)) {
+        setsockopt(s, SOL_TCP, TCP_KEEPINTVL, &amp;optval, <span class="hljs-keyword"><span class="hljs-keyword">sizeof</span></span>(optval));
+      }
+<span class="hljs-preprocessor"><span class="hljs-meta">#</span><span class="hljs-keyword"><span class="hljs-meta"><span class="hljs-meta-keyword">endif</span></span></span></span>
+    }
+  }
+
+   <span class="hljs-keyword"><span class="hljs-keyword">return</span></span> s;
+}
+</code></pre><h4 id="4-kttcp-eepalive-">4. 针对已有程序没有硬编码KTTCP    EEPALIVE实现</h4>
+<p>完全可以借助于第三方工具<a href="http://libkeepalive.sourceforge.net/">libkeepalive</a>，通过LD_PRELOAD方式实现。比如</p>
+<pre><code class="hljs ruby">LD_PRELOAD=<span class="hljs-regexp">/the/path</span><span class="hljs-regexp">/libkeepalive</span><span class="hljs-class"><span class="hljs-regexp">.so</span></span><span class="hljs-regexp"> java -jar /your</span><span class="hljs-regexp">/path/yourapp</span><span class="hljs-class">.jar</span> &amp;
+</code></pre><p>这个工具还有一个比较方便的地方，可以直接在程序运行前指定TCP保活详细参数，可以省去配置sysctl.conf的麻烦：</p>
+<pre><code class="hljs ruby">LD_PRELOAD=<span class="hljs-regexp">/the/path</span><span class="hljs-regexp">/libkeepalive.so </span><span class="hljs-string"><span class="hljs-regexp">\</span></span><span class="hljs-regexp">
+  &gt; KEEPCNT=</span><span class="hljs-number"><span class="hljs-regexp">20</span></span><span class="hljs-regexp"> </span><span class="hljs-string"><span class="hljs-regexp">\</span></span><span class="hljs-regexp">
+  &gt; KEEPIDLE=</span><span class="hljs-number"><span class="hljs-regexp">180</span></span><span class="hljs-regexp"> </span><span class="hljs-string"><span class="hljs-regexp">\</span></span><span class="hljs-regexp">
+  &gt; KEEPINTVL=</span><span class="hljs-number"><span class="hljs-regexp">60</span></span><span class="hljs-regexp"> </span><span class="hljs-string"><span class="hljs-regexp">\</span></span><span class="hljs-regexp">
+  &gt; java -jar /your</span><span class="hljs-regexp">/path/yourapp</span>.jar &amp;
+</code></pre><p>针对较老很久不更新的程序，可以尝试一下嘛。</p>
+<h3 id="-linux-keepalive-">三。Linux内核层面对keepalive处理</h3>
+<p>参数和定义</p>
+<pre><code class="hljs cpp"><span class="hljs-hexcolor"><span class="hljs-meta">#<span class="hljs-meta-keyword">def</span></span></span><span class="hljs-meta"><span class="hljs-meta-keyword">ine</span> MAX_TCP_KEEPIDLE     </span><span class="hljs-number"><span class="hljs-meta">32767</span></span>
+<span class="hljs-hexcolor"><span class="hljs-meta">#<span class="hljs-meta-keyword">def</span></span></span><span class="hljs-meta"><span class="hljs-meta-keyword">ine</span> MAX_TCP_KEEPINTVL     </span><span class="hljs-number"><span class="hljs-meta">32767</span></span>
+<span class="hljs-hexcolor"><span class="hljs-meta">#<span class="hljs-meta-keyword">def</span></span></span><span class="hljs-meta"><span class="hljs-meta-keyword">ine</span> MAX_TCP_KEEPCNT          </span><span class="hljs-number"><span class="hljs-meta">127</span></span>
+<span class="hljs-hexcolor"><span class="hljs-meta">#<span class="hljs-meta-keyword">def</span></span></span><span class="hljs-meta"><span class="hljs-meta-keyword">ine</span> MAX_TCP_SYNCNT          </span><span class="hljs-number"><span class="hljs-meta">127</span></span>
+
+<span class="hljs-hexcolor"><span class="hljs-meta">#<span class="hljs-meta-keyword">def</span></span></span><span class="hljs-meta"><span class="hljs-meta-keyword">ine</span> TCP_KEEPIDLE          </span><span class="hljs-number"><span class="hljs-meta">4</span></span><span class="hljs-meta">     </span><span class="hljs-comment"><span class="hljs-meta"><span class="hljs-comment">/* Start keeplives after this period */</span></span></span>
+<span class="hljs-hexcolor"><span class="hljs-meta">#<span class="hljs-meta-keyword">def</span></span></span><span class="hljs-meta"><span class="hljs-meta-keyword">ine</span> TCP_KEEPINTVL          </span><span class="hljs-number"><span class="hljs-meta">5</span></span><span class="hljs-meta">     </span><span class="hljs-comment"><span class="hljs-meta"><span class="hljs-comment">/* Interval between keepalives */</span></span></span>
+<span class="hljs-hexcolor"><span class="hljs-meta">#<span class="hljs-meta-keyword">def</span></span></span><span class="hljs-meta"><span class="hljs-meta-keyword">ine</span> TCP_KEEPCNT          </span><span class="hljs-number"><span class="hljs-meta">6</span></span><span class="hljs-meta">     </span><span class="hljs-comment"><span class="hljs-meta"><span class="hljs-comment">/* Number of keepalives before death */</span></span></span>
+</code></pre><p>net/ipv4/Tcp.c，可以找到对应关系：</p>
+<pre><code class="hljs php">     <span class="hljs-keyword"><span class="hljs-keyword">case</span></span> <span class="hljs-string">TCP_KEEPIDLE:</span>
+          val = (tp-&gt;keepalive_time ? : sysctl_tcp_keepalive_time) / HZ;
+          <span class="hljs-keyword"><span class="hljs-keyword">break</span></span>;
+     <span class="hljs-keyword"><span class="hljs-keyword">case</span></span> <span class="hljs-string">TCP_KEEPINTVL:</span>
+          val = (tp-&gt;keepalive_intvl ? : sysctl_tcp_keepalive_intvl) / HZ;
+          <span class="hljs-keyword"><span class="hljs-keyword">break</span></span>;
+     <span class="hljs-keyword"><span class="hljs-keyword">case</span></span> <span class="hljs-string">TCP_KEEPCNT:</span>
+          val = tp-&gt;keepalive_probes ? : sysctl_tcp_keepalive_probes;
+          <span class="hljs-keyword"><span class="hljs-keyword">break</span></span>;
+</code></pre><p>初始化：</p>
+<pre><code class="hljs php"> <span class="hljs-keyword"><span class="hljs-keyword">case</span></span> <span class="hljs-type">TCP_KEEPIDLE</span>:
+      <span class="hljs-keyword"><span class="hljs-keyword">if</span></span> (<span class="hljs-function"><span class="hljs-keyword">val</span> <span class="hljs-title">&lt;</span> <span class="hljs-number">1</span> <span class="hljs-title">||</span> <span class="hljs-title">val</span> <span class="hljs-title">&gt;</span> <span class="hljs-title">MAX_TCP_KEEPIDLE</span>)
+</span>           err = -<span class="hljs-type">EINVAL</span>;
+      <span class="hljs-keyword"><span class="hljs-keyword">else</span></span> {
+           tp-&gt;keepalive_time = <span class="hljs-function"><span class="hljs-keyword">val</span> <span class="hljs-title">*</span> <span class="hljs-title">HZ</span>;</span>
+           <span class="hljs-keyword"><span class="hljs-keyword">if</span></span> (sock_flag(sk, <span class="hljs-type">SOCK_KEEPOPEN</span>) &amp;&amp;
+               !((<span class="hljs-number"><span class="hljs-number">1</span></span> &lt;&lt; sk-&gt;sk_state) &amp;
+                 (<span class="hljs-type">TCPF_CLOSE</span> | <span class="hljs-type">TCPF_LISTEN</span>))) {
+                __u32 elapsed = tcp_time_stamp - tp-&gt;rcv_tstamp;
+                <span class="hljs-keyword"><span class="hljs-keyword">if</span></span> (tp-&gt;keepalive_time &gt; elapsed)
+                     elapsed = tp-&gt;keepalive_time - elapsed;
+                <span class="hljs-keyword"><span class="hljs-keyword">else</span></span>
+                     elapsed = <span class="hljs-number"><span class="hljs-number">0</span></span>;
+                inet_csk_reset_keepalive_timer(sk, elapsed);
+           }
+      }
+      <span class="hljs-keyword"><span class="hljs-keyword">break</span></span>;
+ <span class="hljs-keyword"><span class="hljs-keyword">case</span></span> <span class="hljs-type">TCP_KEEPINTVL</span>:
+      <span class="hljs-keyword"><span class="hljs-keyword">if</span></span> (<span class="hljs-function"><span class="hljs-keyword">val</span> <span class="hljs-title">&lt;</span> <span class="hljs-number">1</span> <span class="hljs-title">||</span> <span class="hljs-title">val</span> <span class="hljs-title">&gt;</span> <span class="hljs-title">MAX_TCP_KEEPINTVL</span>)
+</span>           err = -<span class="hljs-type">EINVAL</span>;
+      <span class="hljs-keyword"><span class="hljs-keyword">else</span></span>
+           tp-&gt;keepalive_intvl = <span class="hljs-function"><span class="hljs-keyword">val</span> <span class="hljs-title">*</span> <span class="hljs-title">HZ</span>;</span>
+      <span class="hljs-keyword"><span class="hljs-keyword">break</span></span>;
+ <span class="hljs-keyword"><span class="hljs-keyword">case</span></span> <span class="hljs-type">TCP_KEEPCNT</span>:
+      <span class="hljs-keyword"><span class="hljs-keyword">if</span></span> (<span class="hljs-function"><span class="hljs-keyword">val</span> <span class="hljs-title">&lt;</span> <span class="hljs-number">1</span> <span class="hljs-title">||</span> <span class="hljs-title">val</span> <span class="hljs-title">&gt;</span> <span class="hljs-title">MAX_TCP_KEEPCNT</span>)
+</span>           err = -<span class="hljs-type">EINVAL</span>;
+      <span class="hljs-keyword"><span class="hljs-keyword">else</span></span>
+           tp-&gt;keepalive_probes = <span class="hljs-function"><span class="hljs-keyword">val</span>;</span>
+      <span class="hljs-keyword"><span class="hljs-keyword">break</span></span>;
+</code></pre><p>这里可以找到大部分处理逻辑，net/ipv4/Tcp_timer.c:</p>
+<pre><code class="lang-C hljs"><span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">static</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">void</span></span></span><span class="hljs-function"> </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">tcp_keepalive_timer</span></span></span><span class="hljs-function"> </span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">(<span class="hljs-keyword">unsigned</span> </span></span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-params"><span class="hljs-keyword">long</span></span></span></span><span class="hljs-function"><span class="hljs-params"> data)</span></span></span><span class="hljs-function">
+</span></span>{
+     <span class="hljs-keyword"><span class="hljs-keyword">struct</span></span> sock *sk = (<span class="hljs-keyword"><span class="hljs-keyword">struct</span></span> sock *) data;
+     <span class="hljs-keyword"><span class="hljs-keyword">struct</span></span> inet_connection_sock *icsk = inet_csk(sk);
+     <span class="hljs-keyword"><span class="hljs-keyword">struct</span></span> tcp_sock *tp = tcp_sk(sk);
+     <span class="hljs-number">__u</span>32 elapsed;
+
+     <span class="hljs-comment"><span class="hljs-comment">/* Only process if socket is not in use. */</span></span>
+     bh_lock_sock(sk);
+     <span class="hljs-keyword"><span class="hljs-keyword">if</span></span> (sock_owned_by_user(sk)) {
+          <span class="hljs-comment"><span class="hljs-comment">/* Try again later. */</span></span>
+          inet_csk_reset_keepalive_timer (sk, HZ/<span class="hljs-number"><span class="hljs-number">20</span></span>);
+          <span class="hljs-keyword"><span class="hljs-keyword">goto</span></span> <span class="hljs-keyword">out</span>;
+     }
+
+     <span class="hljs-keyword"><span class="hljs-keyword">if</span></span> (sk-&gt;sk_state == TCP_LISTEN) {
+          tcp_synack_timer(sk);
+          <span class="hljs-keyword"><span class="hljs-keyword">goto</span></span> <span class="hljs-keyword">out</span>;
+     }
+    <span class="hljs-comment"><span class="hljs-comment">// 关闭状态的处理</span></span>
+     <span class="hljs-keyword"><span class="hljs-keyword">if</span></span> (sk-&gt;sk_state == TCP_FIN_WAIT2 &amp;&amp; sock_flag(sk, SOCK_DEAD)) {
+          <span class="hljs-keyword"><span class="hljs-keyword">if</span></span> (tp-&gt;linger2 &gt;= <span class="hljs-number"><span class="hljs-number">0</span></span>) {
+               <span class="hljs-keyword"><span class="hljs-keyword">const</span></span> <span class="hljs-keyword"><span class="hljs-keyword">int</span></span> tmo = tcp_fin_time(sk) - TCP_TIMEWAIT_LEN;
+
+               <span class="hljs-keyword"><span class="hljs-keyword">if</span></span> (tmo &gt; <span class="hljs-number"><span class="hljs-number">0</span></span>) {
+                    tcp_time_wait(sk, TCP_FIN_WAIT2, tmo);
+                    <span class="hljs-keyword"><span class="hljs-keyword">goto</span></span> <span class="hljs-keyword">out</span>;
+               }
+          }
+          tcp_send_active_reset(sk, GFP_ATOMIC);
+          <span class="hljs-keyword"><span class="hljs-keyword">goto</span></span> death;
+     }
+
+     <span class="hljs-keyword"><span class="hljs-keyword">if</span></span> (!sock_flag(sk, SOCK_KEEPOPEN) || sk-&gt;sk_state == TCP_CLOSE)
+          <span class="hljs-keyword"><span class="hljs-keyword">goto</span></span> <span class="hljs-keyword">out</span>;
+
+     elapsed = keepalive_time_when(tp);
+
+     <span class="hljs-comment"><span class="hljs-comment">/* It is alive without keepalive 8) */</span></span>
+     <span class="hljs-keyword"><span class="hljs-keyword">if</span></span> (tp-&gt;packets_out || sk-&gt;sk_send_head)
+          <span class="hljs-keyword"><span class="hljs-keyword">goto</span></span> resched;
+
+     elapsed = tcp_time_stamp - tp-&gt;rcv_tstamp;
+
+     <span class="hljs-keyword"><span class="hljs-keyword">if</span></span> (elapsed &gt;= keepalive_time_when(tp)) {
+          <span class="hljs-keyword"><span class="hljs-keyword">if</span></span> ((!tp-&gt;keepalive_probes &amp;&amp; icsk-&gt;icsk_probes_out &gt;= sysctl_tcp_keepalive_probes) ||
+               (tp-&gt;keepalive_probes &amp;&amp; icsk-&gt;icsk_probes_out &gt;= tp-&gt;keepalive_probes)) {
+               tcp_send_active_reset(sk, GFP_ATOMIC);
+               tcp_write_err(sk); <span class="hljs-comment"><span class="hljs-comment">// 向上层应用汇报连接异常</span></span>
+               <span class="hljs-keyword"><span class="hljs-keyword">goto</span></span> <span class="hljs-keyword">out</span>;
+          }
+          <span class="hljs-keyword"><span class="hljs-keyword">if</span></span> (tcp_write_wakeup(sk) &lt;= <span class="hljs-number"><span class="hljs-number">0</span></span>) {
+               icsk-&gt;icsk_probes_out++; <span class="hljs-comment"><span class="hljs-comment">// 这里仅仅是计数，并没有再次发送保活探测包</span></span>
+               elapsed = keepalive_intvl_when(tp);
+          } <span class="hljs-keyword"><span class="hljs-keyword">else</span></span> {
+               <span class="hljs-comment"><span class="hljs-comment">/* If keepalive was lost due to local congestion,
+               * try harder.
+               */</span></span>
+               elapsed = TCP_RESOURCE_PROBE_INTERVAL;
+          }
+     } <span class="hljs-keyword"><span class="hljs-keyword">else</span></span> {
+          <span class="hljs-comment"><span class="hljs-comment">/* It is tp-&gt;rcv_tstamp + keepalive_time_when(tp) */</span></span>
+          elapsed = keepalive_time_when(tp) - elapsed;
+     }
+
+     TCP_CHECK_TIMER(sk);
+     sk_stream_mem_reclaim(sk);
+
+resched:
+     inet_csk_reset_keepalive_timer (sk, elapsed);
+     <span class="hljs-keyword"><span class="hljs-keyword">goto</span></span> <span class="hljs-keyword">out</span>;
+
+death:    
+     tcp_done(sk);
+
+<span class="hljs-keyword">out</span>:
+     bh_unlock_sock(sk);
+     sock_put(sk);
+}
+</code></pre>
+<p>keepalive_intvl_when 函数定义：</p>
+<pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">static</span></span></span><span class="hljs-function"> <span class="hljs-keyword">inline</span> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">int</span></span></span><span class="hljs-function"> </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">keepalive_intvl_when</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">(</span></span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-params"><span class="hljs-keyword">const</span></span></span></span><span class="hljs-function"><span class="hljs-params"> </span></span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-params"><span class="hljs-keyword">struct</span></span></span></span><span class="hljs-function"><span class="hljs-params"> tcp_sock *tp)</span></span></span><span class="hljs-function">
+</span></span>{
+    <span class="hljs-keyword"><span class="hljs-keyword">return</span></span> tp-&gt;keepalive_intvl ? : sysctl_tcp_keepalive_intvl;
+}
+</code></pre><h3 id="-tcp-keepalive-">四。TCP Keepalive 引发的错误</h3>
+<p>启用TCP Keepalive的应用程序，一般可以捕获到下面几种类型错误</p>
+<ol>
+<li>ETIMEOUT 超时错误，在发送一个探测保护包经过(tcp_keepalive_time + tcp_keepalive_intvl * tcp_keepalive_probes)时间后仍然没有接收到ACK确认情况下触发的异常，套接字被关闭<pre><code class="hljs css"><span class="hljs-selector-tag">java</span><span class="hljs-class"><span class="hljs-selector-class">.io</span></span><span class="hljs-class"><span class="hljs-selector-class">.IOException</span></span>: <span class="hljs-selector-tag">Connection</span> <span class="hljs-selector-tag">timed</span> <span class="hljs-selector-tag">out</span>
+</code></pre></li>
+<li>EHOSTUNREACH host unreachable(主机不可达)错误，这个应该是ICMP汇报给上层应用的。<pre><code class="hljs css"><span class="hljs-selector-tag">java</span><span class="hljs-class"><span class="hljs-selector-class">.io</span></span><span class="hljs-class"><span class="hljs-selector-class">.IOException</span></span>: <span class="hljs-selector-tag">No</span> <span class="hljs-selector-tag">route</span> <span class="hljs-selector-tag">to</span> <span class="hljs-selector-tag">host</span>
+</code></pre></li>
+<li>链接被重置，终端可能崩溃死机重启之后，接收到来自服务器的报文，然物是人非，前朝往事，只能报以无奈重置宣告之。<pre><code class="hljs css"><span class="hljs-selector-tag">java</span><span class="hljs-class"><span class="hljs-selector-class">.io</span></span><span class="hljs-class"><span class="hljs-selector-class">.IOException</span></span>: <span class="hljs-selector-tag">Connection</span> <span class="hljs-selector-tag">reset</span> <span class="hljs-selector-tag">by</span> <span class="hljs-selector-tag">peer</span>
+</code></pre></li>
+</ol>
+<h3 id="-">五。常见的使用模式</h3>
+<ol>
+<li>默认情况下使用keepalive周期为2个小时，如不选择更改，属于误用范畴，造成资源浪费：内核会为每一个连接都打开一个保活计时器，N个连接会打开N个保活计时器。
+优势很明显：</li>
+</ol>
+<ul>
+<li>TCP协议层面保活探测机制，系统内核完全替上层应用自动给做好了</li>
+<li>内核层面计时器相比上层应用，更为高效</li>
+<li>上层应用只需要处理数据收发、连接异常通知即可</li>
+<li>数据包将更为紧凑</li>
+</ul>
+<ol>
+<li>关闭TCP的keepalive，完全使用业务层面心跳保活机制
+完全应用掌管心跳，灵活和可控，比如每一个连接心跳周期的可根据需要减少或延长</li>
+<li>业务心跳 + TCP keepalive一起使用，互相作为补充，但TCP保活探测周期和应用的心跳周期要协调，以互补方可，不能够差距过大，否则将达不到设想的效果。朋友的公司所做IM平台业务心跳2-5分钟智能调整 + tcp keepalive 300秒，组合协作，据说效果也不错。</li>
+</ol>
+<p>虽然说没有固定的模式可遵循，那么有以下原则可以参考：</p>
+<ul>
+<li>不想折腾，那就弃用TCP Keepalive吧，完全依赖应用层心跳机制，灵活可控性强</li>
+<li>除非可以很好把控TCP Keepalive机制，那就可以根据需要自由使用吧</li>
+</ul>
+<h3 id="-http-keep-alive-">六。注意和 HTTP的Keep-Alive区别</h3>
+<ul>
+<li>HTTP协议的Keep-Alive意图在于连接复用，同一个连接上串行方式传递请求-响应数据</li>
+<li>TCP的keepalive机制意图在于保活、心跳，检测连接错误。</li>
+</ul>
+<h3 id="-">七。引用</h3>
+<ol>
+<li><a href="http://www.netis.com.cn/flows/2012/11/tcpkeepalive/">我来说说TCP保活</a></li>
+<li><a href="http://www.tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO/">TCP Keepalive HOWTO</a></li>
+</ol>
+</div><br><br><div><span style="color: #008000;">----------------------------------------------------------------------------<br>
+广而告之，让您自由畅游网络~</span></div>
+<div><a target="_blank" href="http://gjsq.me/1034269">推荐一个我一直使用的VPN 翻*墙利器，平常正常谷歌搜索，登陆Gmail，闲时观看youtube等高清视频一点都不卡！</a></div>
+<div>再超值提供一个近期2015年有效的9折优惠码：<u><strong>10off2015</strong></u><br>
+<br>作为码农，严重推荐！</div></div>
+		<p class="postfoot">
+			posted on 2015-04-14 17:08 <a href="http://www.blogjava.net/yongboy/">nieyong</a> 阅读(16515) <a href="http://www.blogjava.net/yongboy/archive/2015/04/14/424413.html#Post">评论(1)</a> &nbsp;<a href="http://www.blogjava.net/yongboy/admin/EditPosts.aspx?postid=424413">编辑</a> &nbsp;<a href="http://www.blogjava.net/yongboy/AddToFavorite.aspx?id=424413">收藏</a>  
+		</p>
+	</div>
+	<img src="./随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava_files/424413.html" width="1" height="1">
+	
+<!--
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+xmlns:dc="http://purl.org/dc/elements/1.1/"
+xmlns:trackback="http://madskills.com/public/xml/rss/module/trackback/">
+<rdf:Description
+rdf:about="http://www.blogjava.net/yongboy/archive/2015/04/14/424413.html"
+dc:identifier="http://www.blogjava.net/yongboy/archive/2015/04/14/424413.html"
+dc:title="随手记之TCP Keepalive笔记"
+trackback:ping="http://www.blogjava.net/yongboy/services/trackbacks/424413.aspx" />
+</rdf:RDF>
+-->
+
+	<script type="text/javascript">
+//<![CDATA[
+Sys.WebForms.PageRequestManager._initialize('AjaxHolder$scriptmanager1', document.getElementById('Form1'));
+Sys.WebForms.PageRequestManager.getInstance()._updateControls(['tAjaxHolder$UpdatePanel1'], [], [], 90);
+//]]>
+</script>
+
+<div id="AjaxHolder_UpdatePanel1">
+	    
+    <a name="pagedcomment"></a>
+<a name="评论">
+</a><div id="comments"><a name="评论">
+<h3>评论</h3>
+	
+	
+			</a><h4><a name="评论">
+				</a><a title="permalink: re: 随手记之TCP Keepalive笔记" href="http://www.blogjava.net/yongboy/archive/2015/04/14/424413.html#431193">#</a>&nbsp;<a name="431193"></a>re: 随手记之TCP Keepalive笔记<a name="Post"></a>
+					<span>
+						2016-07-14 18:29
+					</span>
+				<a id="AjaxHolder_Comments_CommentList_ctl00_NameLink" target="_blank">hy</a>
+			</h4>
+			<p>
+				请问一下笔者，tcp的服务端和客户端，二者之间既然可以进行通信，那么肯定可以做到一方定时向另一方发送心跳数据包，这已经实现了心跳机制，为何还需要操作系统层面的支持？为何需要高层应用打开这个keepalive的机制？？&nbsp;&nbsp;<a onclick="return SetReplyAuhor(&quot;hy&quot;)" href="http://www.blogjava.net/yongboy/archive/2015/04/14/424413.html#post">回复</a>&nbsp;&nbsp;<a title="查看该作者发表过的评论" href="http://www.blogjava.net/comment?author=hy" target="_blank">更多评论</a>
+				<a id="AjaxHolder_Comments_CommentList_ctl00_DeleteLink" href="javascript:__doPostBack(&#39;AjaxHolder$Comments$CommentList$ctl00$DeleteLink&#39;,&#39;&#39;)"></a>&nbsp;&nbsp;<a id="AjaxHolder_Comments_CommentList_ctl00_EditLink"></a>
+			</p>
+		
+</div>
+<style>
+td { font-size: 12px }
+.commentTextBox 
+{ 
+    font-family : Verdana; 
+    font-size: 13px;
+ }
+</style>
+<!--Beging Temp Save-->
+<style>.userData { BEHAVIOR: url(#default#userdata) }
+	</style>
+<div class="userData" id="CommentsPersistDiv"></div>
+
+<script type="text/javascript">
+function pageLoad()
+{
+    Sys.WebForms.PageRequestManager.getInstance().add_initializeRequest(handleInitializeRequest);
+    //Sys.WebForms.PageRequestManager.getInstance().add_endRequest(handleEndRequest);
+}
+
+function handleInitializeRequest(sender, args)
+{
+    var prm = Sys.WebForms.PageRequestManager.getInstance();
+    var eid = args.get_postBackElement().id;
+    if (eid.indexOf("DeleteLink")>0) 
+    {
+       args.get_postBackElement().innerHTML = "<font color='red'>正在删除...</font>";         
+    }    
+    else if (eid.indexOf("btnSubmit")>0) 
+    {
+       document.getElementById("AjaxHolder_PostComment_ltSubmitMsg").innerHTML="正在提交...";
+       document.getElementById("AjaxHolder_PostComment_btnSubmit").disabled = true;       
+    }   
+    else if(eid.indexOf("refreshList")>0)
+    {
+        document.getElementById("AjaxHolder_PostComment_refreshList").innerHTML="<font color='red'>正在刷新...</font>";
+    }
+   
+}	
+
+function TempSave(ElementID)
+{
+	try
+	{
+	CommentsPersistDiv.setAttribute("CommentContent",document.getElementById(ElementID).value);
+	CommentsPersistDiv.save("CommentXMLStore");
+	}
+	catch(ex)
+	{
+	}
+	
+}
+function Restore(ElementID)
+{
+	CommentsPersistDiv.load("CommentXMLStore");
+	document.getElementById(ElementID).value=CommentsPersistDiv.getAttribute("CommentContent");
+}	
+			
+			
+</script>
+<!--Ene TempSave-->
+<div id="divRefreshComments" style="text-align:right;margin-right:10px;margin-bottom:5px;font-size:12px"><a href="http://www.blogjava.net/RequireRegister.aspx">新用户注册</a>&nbsp;&nbsp;<a id="AjaxHolder_PostComment_refreshList" href="javascript:__doPostBack(&#39;AjaxHolder$PostComment$refreshList&#39;,&#39;&#39;)">刷新评论列表</a>&nbsp;&nbsp;</div>
+<div class="commentform">
+<span id="AjaxHolder_PostComment_ltSubmitMsg" style="color:Red;"></span>
+<br>
+<a name="Feedback"></a>
+	<table cellspacing="1" cellpadding="1" border="0">
+		<tbody><tr>
+		<td id="AjaxHolder_PostComment_tdOnCommentForm" colspan="3" style="line-height:1.5">		
+		</td>
+	
+		</tr>
+		
+		<tr><td colspan="3">只有注册用户<a href="http://www.blogjava.net/login.aspx?ReturnUrl=/yongboy/archive/2015/04/14/424413.html">登录</a>后才能发表评论。</td></tr>
+		<tr>
+			<td colspan="3"><!--该文被作者在 2015-04-14 17:14 编辑过--></td>
+		</tr>
+		<!--
+		<TR>
+			<TD colSpan="3" height="5"></TD>
+		</TR>	
+		-->	
+		<tr>
+		<td colspan="3">
+		<br>
+		
+<script type="text/javascript">
+var googletag = googletag || {};
+googletag.cmd = googletag.cmd || [];
+(function() {
+var gads = document.createElement('script');
+gads.async = true;
+gads.type = 'text/javascript';
+var useSSL = 'https:' == document.location.protocol;
+gads.src = (useSSL ? 'https:' : 'http:') + 
+'//www.googletagservices.com/tag/js/gpt.js';
+var node = document.getElementsByTagName('script')[0];
+node.parentNode.insertBefore(gads, node);
+})();
+</script>
+
+<script type="text/javascript">
+googletag.cmd.push(function() {
+googletag.defineSlot('/1090369/blogjava_blogpost_bottom', [300, 250], 'div-gpt-ad-1364133350381-0').addService(googletag.pubads());
+googletag.pubads().enableSingleRequest();
+googletag.enableServices();
+});
+</script>
+<!-- blogjava_blogpost_bottom -->
+<div id="div-gpt-ad-1364133350381-0" style="width:300px; height:250px;" data-google-query-id="CJyupcuvt9ICFQY6lgodnCUEZg">
+<script type="text/javascript">
+googletag.cmd.push(function() { googletag.display('div-gpt-ad-1364133350381-0'); });
+</script>
+<div id="google_ads_iframe_/1090369/blogjava_blogpost_bottom_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/blogjava_blogpost_bottom_0" title="3rd party ad content" name="google_ads_iframe_/1090369/blogjava_blogpost_bottom_0" width="300" height="250" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" style="border: 0px; vertical-align: bottom;" src="./随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava_files/saved_resource.html"></iframe></div></div>
+<br>
+
+		</td>
+		</tr>
+		<tr>			
+		<td colspan="3">
+		
+		</td>
+		</tr>
+		<tr>
+		<td colspan="3"></td>
+		</tr>
+		<tr>
+			<td colspan="3" height="1">网站导航:<div id="blogsite">
+			<a href="http://www.cnblogs.com/" title="开发者的网上家园">博客园</a>&nbsp;&nbsp;
+			<a href="https://news.cnblogs.com/">IT新闻</a>&nbsp;&nbsp;
+			<a href="http://kb.cnblogs.com/">知识库</a>&nbsp;&nbsp;
+			<a href="http://www.cppblog.com/">C++博客</a>&nbsp;&nbsp;
+			<a href="https://q.cnblogs.com/">博问</a>&nbsp;&nbsp;
+			<a href="http://www.blogjava.net/yongboy/archive/2015/04/14/424413.html?opt=admin">管理</a>
+			</div>
+		</td>
+		</tr>
+		<tr>
+			<td colspan="3" height="5"></td>
+		</tr>	
+		<tr>
+			<td colspan="3">&nbsp;</td>
+		</tr>
+		<tr>
+			<td colspan="3" height="5"></td>
+		</tr>
+		<tr>
+			<td colspan="3">
+				</td>
+		</tr>		
+	</tbody></table>	
+</div>
+<div id="AjaxHolder_PostComment_ValidationSummary1" style="color:Red;display:none;">
+
+	</div>
+
+</div>
+
+				
+			</div>
+			<div id="rightmenu">
+				
+					
+<h3>公告</h3>
+	<div>所有文章皆为原创，若转载请标明出处，谢谢~ </div>
+<br>
+新浪微博，欢迎关注：<br>
+<a href="http://weibo.com/u/1639071877?s=6uyXnP" target="_blank"><img src="./随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava_files/1.png" alt="" border="0" width="270"></a>
+
+					
+<h3>导航</h3>
+<ul>
+			<li><a id="MyLinks1_HomeLink" href="http://www.blogjava.net/">BlogJava</a></li>
+			<li><a id="MyLinks1_MyHomeLink" href="http://www.blogjava.net/yongboy/">首页</a></li>
+			<li><a id="MyLinks1_NewPostLink" href="http://www.blogjava.net/yongboy/admin/EditPosts.aspx?opt=1">新随笔</a></li>
+			<li><a id="MyLinks1_ContactLink" accesskey="9" href="http://www.blogjava.net/yongboy/contact.aspx?id=1">联系</a></li>
+			<li><a id="MyLinks1_Syndication" href="http://www.blogjava.net/yongboy/rss">聚合</a><a id="MyLinks1_XMLLink" href="http://www.blogjava.net/yongboy/rss"><img src="./随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava_files/xml.gif" style="border-width:0px;"></a>
+			</li><li><a id="MyLinks1_Admin" href="http://www.blogjava.net/yongboy/admin/EditPosts.aspx">管理</a></li>
+</ul>
+					<table id="Calendar1_entryCal" class="Cal" cellspacing="0" cellpadding="0" title="日历" border="0" style="border-width:1px;border-style:solid;border-collapse:collapse;">
+	<tbody><tr><td colspan="7" style="background-color:Silver;"><table class="CalTitle" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">
+		<tbody><tr><td class="CalNextPrev" style="width:15%;"><a href="javascript:__doPostBack(&#39;Calendar1$entryCal&#39;,&#39;V5538&#39;)" style="color:Black" title="转到上一个月">&lt;</a></td><td align="center" style="width:70%;">2015年4月</td><td class="CalNextPrev" align="right" style="width:15%;"><a href="javascript:__doPostBack(&#39;Calendar1$entryCal&#39;,&#39;V5599&#39;)" style="color:Black" title="转到下一个月">&gt;</a></td></tr>
+	</tbody></table></td></tr><tr><th class="CalDayHeader" align="center" abbr="日" scope="col">日</th><th class="CalDayHeader" align="center" abbr="一" scope="col">一</th><th class="CalDayHeader" align="center" abbr="二" scope="col">二</th><th class="CalDayHeader" align="center" abbr="三" scope="col">三</th><th class="CalDayHeader" align="center" abbr="四" scope="col">四</th><th class="CalDayHeader" align="center" abbr="五" scope="col">五</th><th class="CalDayHeader" align="center" abbr="六" scope="col">六</th></tr><tr><td class="CalOtherMonthDay" align="center" style="width:14%;">29</td><td class="CalOtherMonthDay" align="center" style="width:14%;">30</td><td class="CalOtherMonthDay" align="center" style="width:14%;">31</td><td align="center" style="width:14%;">1</td><td align="center" style="width:14%;">2</td><td align="center" style="width:14%;">3</td><td class="CalWeekendDay" align="center" style="width:14%;">4</td></tr><tr><td class="CalWeekendDay" align="center" style="width:14%;">5</td><td align="center" style="width:14%;">6</td><td align="center" style="width:14%;">7</td><td align="center" style="width:14%;">8</td><td align="center" style="width:14%;">9</td><td align="center" style="width:14%;">10</td><td class="CalWeekendDay" align="center" style="width:14%;">11</td></tr><tr><td class="CalWeekendDay" align="center" style="width:14%;">12</td><td align="center" style="width:14%;">13</td><td align="center" style="width:14%;"><a href="http://www.blogjava.net/yongboy/archive/2015/04/14.html"><u>14</u></a></td><td align="center" style="width:14%;">15</td><td align="center" style="width:14%;">16</td><td align="center" style="width:14%;">17</td><td class="CalWeekendDay" align="center" style="width:14%;">18</td></tr><tr><td class="CalWeekendDay" align="center" style="width:14%;">19</td><td align="center" style="width:14%;">20</td><td align="center" style="width:14%;">21</td><td align="center" style="width:14%;">22</td><td align="center" style="width:14%;">23</td><td align="center" style="width:14%;">24</td><td class="CalWeekendDay" align="center" style="width:14%;">25</td></tr><tr><td class="CalWeekendDay" align="center" style="width:14%;">26</td><td align="center" style="width:14%;">27</td><td align="center" style="width:14%;">28</td><td align="center" style="width:14%;">29</td><td align="center" style="width:14%;">30</td><td class="CalOtherMonthDay" align="center" style="width:14%;">1</td><td class="CalOtherMonthDay" align="center" style="width:14%;">2</td></tr><tr><td class="CalOtherMonthDay" align="center" style="width:14%;">3</td><td class="CalOtherMonthDay" align="center" style="width:14%;">4</td><td class="CalOtherMonthDay" align="center" style="width:14%;">5</td><td class="CalOtherMonthDay" align="center" style="width:14%;">6</td><td class="CalOtherMonthDay" align="center" style="width:14%;">7</td><td class="CalOtherMonthDay" align="center" style="width:14%;">8</td><td class="CalOtherMonthDay" align="center" style="width:14%;">9</td></tr>
+</tbody></table>
+
+					
+<h3>统计</h3>
+	<ul>
+		<li>随笔 - 147
+		</li><li>文章 - 0
+		</li><li>评论 - 309
+		</li><li>引用 - 0
+	</li>
+</ul>
+					
+<h3>常用链接</h3>
+<ul>
+		<li><a id="SingleColumn1_ctl00_repeaterLinks_ctl01_lnkLinkItem" href="http://www.blogjava.net/yongboy/MyPosts.html">我的随笔</a></li>
+	
+		<li><a id="SingleColumn1_ctl00_repeaterLinks_ctl02_lnkLinkItem" href="http://www.blogjava.net/yongboy/MyComments.html">我的评论</a></li>
+	
+		<li><a id="SingleColumn1_ctl00_repeaterLinks_ctl03_lnkLinkItem" href="http://www.blogjava.net/yongboy/OtherPosts.html">我的参与</a></li>
+	
+		<li><a id="SingleColumn1_ctl00_repeaterLinks_ctl04_lnkLinkItem" href="http://www.blogjava.net/yongboy/RecentComments.html">最新评论</a></li>
+	</ul>
+<h3>留言簿<span style="font-size:11px;font-weight:normal;">(40)</span></h3>
+<ul>
+	<li>
+		<a id="SingleColumn1_ctl01_lnkMessages" href="http://www.blogjava.net/yongboy/Contact.aspx?id=1">给我留言</a>
+	</li><li>
+		<a id="SingleColumn1_ctl01_lnkPublicMsgView" href="http://www.blogjava.net/yongboy/default.aspx?opt=msg">查看公开留言</a>
+	</li><li>
+		<a id="SingleColumn1_ctl01_lnkPrivateMsgView" href="http://www.blogjava.net/yongboy/admin/MyMessages.aspx">查看私人留言</a>
+	</li>
+</ul>
+
+		<h3>随笔分类<span style="font-size:11px;font-weight:normal">(123)</span></h3>
+		
+				<ul>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl00_LinkList_ctl01_Link" href="http://www.blogjava.net/yongboy/category/54842.html">C1M(6)</a> <a id="SingleColumn1_Categories_CatList_ctl00_LinkList_ctl01_RssLink" title="Subscribe to C1M(6)" href="http://www.blogjava.net/yongboy/category/54842.html/rss">(rss)</a></li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl00_LinkList_ctl02_Link" href="http://www.blogjava.net/yongboy/category/54836.html">HTTP(6)</a> <a id="SingleColumn1_Categories_CatList_ctl00_LinkList_ctl02_RssLink" title="Subscribe to HTTP(6)" href="http://www.blogjava.net/yongboy/category/54836.html/rss">(rss)</a></li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl00_LinkList_ctl03_Link" href="http://www.blogjava.net/yongboy/category/54839.html">Java(20)</a> <a id="SingleColumn1_Categories_CatList_ctl00_LinkList_ctl03_RssLink" title="Subscribe to Java(20)" href="http://www.blogjava.net/yongboy/category/54839.html/rss">(rss)</a></li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl00_LinkList_ctl04_Link" href="http://www.blogjava.net/yongboy/category/54835.html">MQTT(15)</a> <a id="SingleColumn1_Categories_CatList_ctl00_LinkList_ctl04_RssLink" title="Subscribe to MQTT(15)" href="http://www.blogjava.net/yongboy/category/54835.html/rss">(rss)</a></li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl00_LinkList_ctl05_Link" href="http://www.blogjava.net/yongboy/category/48044.html">Servlet3(26)</a> <a id="SingleColumn1_Categories_CatList_ctl00_LinkList_ctl05_RssLink" title="Subscribe to Servlet3(26)" href="http://www.blogjava.net/yongboy/category/48044.html/rss">(rss)</a></li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl00_LinkList_ctl06_Link" href="http://www.blogjava.net/yongboy/category/54837.html">Socket(19)</a> <a id="SingleColumn1_Categories_CatList_ctl00_LinkList_ctl06_RssLink" title="Subscribe to Socket(19)" href="http://www.blogjava.net/yongboy/category/54837.html/rss">(rss)</a></li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl00_LinkList_ctl07_Link" href="http://www.blogjava.net/yongboy/category/54838.html">socket.io(12)</a> <a id="SingleColumn1_Categories_CatList_ctl00_LinkList_ctl07_RssLink" title="Subscribe to socket.io(12)" href="http://www.blogjava.net/yongboy/category/54838.html/rss">(rss)</a></li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl00_LinkList_ctl08_Link" href="http://www.blogjava.net/yongboy/category/55089.html">压测(10)</a> <a id="SingleColumn1_Categories_CatList_ctl00_LinkList_ctl08_RssLink" title="Subscribe to 压测(10)" href="http://www.blogjava.net/yongboy/category/55089.html/rss">(rss)</a></li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl00_LinkList_ctl09_Link" href="http://www.blogjava.net/yongboy/category/54841.html">容器(7)</a> <a id="SingleColumn1_Categories_CatList_ctl00_LinkList_ctl09_RssLink" title="Subscribe to 容器(7)" href="http://www.blogjava.net/yongboy/category/54841.html/rss">(rss)</a></li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl00_LinkList_ctl10_Link" href="http://www.blogjava.net/yongboy/category/54840.html">移动后端(2)</a> <a id="SingleColumn1_Categories_CatList_ctl00_LinkList_ctl10_RssLink" title="Subscribe to 移动后端(2)" href="http://www.blogjava.net/yongboy/category/54840.html/rss">(rss)</a></li>
+			
+				</ul>
+			
+	
+		<h3>随笔档案<span style="font-size:11px;font-weight:normal">(146)</span></h3>
+		
+				<ul>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl01_Link" href="http://www.blogjava.net/yongboy/archive/2016/08.html">2016年8月 (2)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl02_Link" href="http://www.blogjava.net/yongboy/archive/2016/07.html">2016年7月 (8)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl03_Link" href="http://www.blogjava.net/yongboy/archive/2015/05.html">2015年5月 (1)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl04_Link" href="http://www.blogjava.net/yongboy/archive/2015/04.html">2015年4月 (1)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl05_Link" href="http://www.blogjava.net/yongboy/archive/2015/03.html">2015年3月 (7)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl06_Link" href="http://www.blogjava.net/yongboy/archive/2015/02.html">2015年2月 (6)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl07_Link" href="http://www.blogjava.net/yongboy/archive/2015/01.html">2015年1月 (9)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl08_Link" href="http://www.blogjava.net/yongboy/archive/2014/12.html">2014年12月 (3)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl09_Link" href="http://www.blogjava.net/yongboy/archive/2014/11.html">2014年11月 (2)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl10_Link" href="http://www.blogjava.net/yongboy/archive/2014/10.html">2014年10月 (1)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl11_Link" href="http://www.blogjava.net/yongboy/archive/2014/09.html">2014年9月 (1)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl12_Link" href="http://www.blogjava.net/yongboy/archive/2014/08.html">2014年8月 (2)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl13_Link" href="http://www.blogjava.net/yongboy/archive/2014/07.html">2014年7月 (2)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl14_Link" href="http://www.blogjava.net/yongboy/archive/2014/06.html">2014年6月 (2)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl15_Link" href="http://www.blogjava.net/yongboy/archive/2014/05.html">2014年5月 (2)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl16_Link" href="http://www.blogjava.net/yongboy/archive/2014/04.html">2014年4月 (1)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl17_Link" href="http://www.blogjava.net/yongboy/archive/2014/03.html">2014年3月 (1)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl18_Link" href="http://www.blogjava.net/yongboy/archive/2014/02.html">2014年2月 (4)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl19_Link" href="http://www.blogjava.net/yongboy/archive/2013/12.html">2013年12月 (4)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl20_Link" href="http://www.blogjava.net/yongboy/archive/2013/08.html">2013年8月 (1)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl21_Link" href="http://www.blogjava.net/yongboy/archive/2013/06.html">2013年6月 (1)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl22_Link" href="http://www.blogjava.net/yongboy/archive/2013/05.html">2013年5月 (1)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl23_Link" href="http://www.blogjava.net/yongboy/archive/2013/04.html">2013年4月 (5)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl24_Link" href="http://www.blogjava.net/yongboy/archive/2013/03.html">2013年3月 (5)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl25_Link" href="http://www.blogjava.net/yongboy/archive/2012/10.html">2012年10月 (2)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl26_Link" href="http://www.blogjava.net/yongboy/archive/2012/08.html">2012年8月 (2)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl27_Link" href="http://www.blogjava.net/yongboy/archive/2012/06.html">2012年6月 (2)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl28_Link" href="http://www.blogjava.net/yongboy/archive/2012/05.html">2012年5月 (3)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl29_Link" href="http://www.blogjava.net/yongboy/archive/2012/04.html">2012年4月 (4)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl30_Link" href="http://www.blogjava.net/yongboy/archive/2012/03.html">2012年3月 (1)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl31_Link" href="http://www.blogjava.net/yongboy/archive/2012/02.html">2012年2月 (7)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl32_Link" href="http://www.blogjava.net/yongboy/archive/2012/01.html">2012年1月 (2)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl33_Link" href="http://www.blogjava.net/yongboy/archive/2011/04.html">2011年4月 (1)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl34_Link" href="http://www.blogjava.net/yongboy/archive/2011/03.html">2011年3月 (1)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl35_Link" href="http://www.blogjava.net/yongboy/archive/2011/02.html">2011年2月 (4)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl36_Link" href="http://www.blogjava.net/yongboy/archive/2011/01.html">2011年1月 (10)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl37_Link" href="http://www.blogjava.net/yongboy/archive/2010/12.html">2010年12月 (5)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl38_Link" href="http://www.blogjava.net/yongboy/archive/2010/11.html">2010年11月 (1)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl39_Link" href="http://www.blogjava.net/yongboy/archive/2010/10.html">2010年10月 (10)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl40_Link" href="http://www.blogjava.net/yongboy/archive/2010/07.html">2010年7月 (4)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl41_Link" href="http://www.blogjava.net/yongboy/archive/2009/11.html">2009年11月 (1)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl42_Link" href="http://www.blogjava.net/yongboy/archive/2009/09.html">2009年9月 (3)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl43_Link" href="http://www.blogjava.net/yongboy/archive/2009/08.html">2009年8月 (4)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl44_Link" href="http://www.blogjava.net/yongboy/archive/2009/05.html">2009年5月 (1)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl45_Link" href="http://www.blogjava.net/yongboy/archive/2009/02.html">2009年2月 (1)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl46_Link" href="http://www.blogjava.net/yongboy/archive/2009/01.html">2009年1月 (1)</a> </li>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl01_LinkList_ctl47_Link" href="http://www.blogjava.net/yongboy/archive/2008/12.html">2008年12月 (4)</a> </li>
+			
+				</ul>
+			
+	
+		<h3>个人收藏</h3>
+		
+				<ul>
+			
+				<li><a id="SingleColumn1_Categories_CatList_ctl02_LinkList_ctl01_Link" href="http://gjsq.me/1034269" target="_blank">国内老牌GreenVPN，翻墙速度确实杠杠的！</a> </li>
+			<li style="margin-top:2px;">个人一直在使用中，在线观看www.youtube.com上高清视频一点都不卡。
+每个月才18块钱，一个季度48，再超值提供一个9折优惠码：freevpnssh。
+
+
+我平常在Linux下安装/更新软件，压根不用担心GFW阻挠了，
+更不用提windows 7了。</li>
+				</ul>
+			
+	
+
+<h3>最新随笔</h3>
+<div class="RecentComment">
+<ul style="word-break:break-all">
+	
+	
+			<li><a id="SingleColumn1_ctl03_RecentPostsList_ctl00_RecentPostsList2_ctl00_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2016/08/16/431601.html">1.&nbsp;Tsung笔记之IP地址和端口限制突破篇</a></li>
+		
+		
+	
+			<li><a id="SingleColumn1_ctl03_RecentPostsList_ctl01_RecentPostsList2_ctl00_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2016/08/08/431498.html">2.&nbsp;Tsung笔记之100万用户压测执行步骤篇</a></li>
+		
+		
+	
+			<li><a id="SingleColumn1_ctl03_RecentPostsList_ctl02_RecentPostsList2_ctl00_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2016/07/30/431396.html">3.&nbsp;Tsung笔记之插件编写篇</a></li>
+		
+		
+	
+			<li><a id="SingleColumn1_ctl03_RecentPostsList_ctl03_RecentPostsList2_ctl00_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2016/07/29/431367.html">4.&nbsp;Tsung笔记之监控数据收集篇</a></li>
+		
+		
+	
+			<li><a id="SingleColumn1_ctl03_RecentPostsList_ctl04_RecentPostsList2_ctl00_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2016/07/28/431354.html">5.&nbsp;Tsung笔记之IP直连支持篇</a></li>
+		
+		
+	
+			<li><a id="SingleColumn1_ctl03_RecentPostsList_ctl05_RecentPostsList2_ctl00_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2016/07/27/431340.html">6.&nbsp;Tsung笔记之分布式增强跳出SSH羁绊篇</a></li>
+		
+		
+	
+			<li><a id="SingleColumn1_ctl03_RecentPostsList_ctl06_RecentPostsList2_ctl00_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2016/07/26/431322.html">7.&nbsp;Tsung笔记之压测端资源限制篇</a></li>
+		
+		
+	
+			<li><a id="SingleColumn1_ctl03_RecentPostsList_ctl07_RecentPostsList2_ctl00_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2016/07/25/431310.html">8.&nbsp;Tsung笔记之主从资源协调篇</a></li>
+		
+		
+	
+			<li><a id="SingleColumn1_ctl03_RecentPostsList_ctl08_RecentPostsList2_ctl00_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2016/07/23/431294.html">9.&nbsp;Tsung笔记之主从模型篇</a></li>
+		
+		
+	
+			<li><a id="SingleColumn1_ctl03_RecentPostsList_ctl09_RecentPostsList2_ctl00_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2016/07/22/431291.html">10.&nbsp;Tsung笔记之开篇</a></li>
+		
+		
+	
+			<li><a id="SingleColumn1_ctl03_RecentPostsList_ctl10_RecentPostsList2_ctl00_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2015/05/07/424917.html">11.&nbsp;TCP协议缺陷不完全记录</a></li>
+		
+		
+	
+			<li><a id="SingleColumn1_ctl03_RecentPostsList_ctl11_RecentPostsList2_ctl00_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2015/04/14/424413.html">12.&nbsp;随手记之TCP Keepalive笔记</a></li>
+		
+		
+	
+			<li><a id="SingleColumn1_ctl03_RecentPostsList_ctl12_RecentPostsList2_ctl00_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2015/03/30/423963.html">13.&nbsp;移动APP后端网络处理一些问题记录</a></li>
+		
+		
+	
+			<li><a id="SingleColumn1_ctl03_RecentPostsList_ctl13_RecentPostsList2_ctl00_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2015/03/24/423791.html">14.&nbsp;HTTP/2笔记之错误处理和安全</a></li>
+		
+		
+	
+			<li><a id="SingleColumn1_ctl03_RecentPostsList_ctl14_RecentPostsList2_ctl00_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2015/03/23/423751.html">15.&nbsp;HTTP/2笔记之消息交换</a></li>
+		
+	
+</ul>
+</div>
+
+<script language="JavaScript">
+function SearchGoogle(key,evt,site)
+		{
+			if(evt.keyCode==13 || evt.keyCode==0 || evt.type =='click')
+			{
+				key.focus();
+				var keystr = encodeURIComponent(key.value);
+				url = "http://www.google.com/search?q=";
+				url = url+keystr;
+				url += "&ie=UTF-8&oe=GB2312&hl=zh-CN&domains="+site+"&sitesearch="+site;
+				window.location=url;
+				return false;
+			}
+		}
+</script>
+<h3>搜索</h3>
+<ul>
+	<li>
+		</li><li><input style="WIDTH: 130px" type="text" name="q" id="q" onkeydown="return SearchGoogle(document.getElementById(&#39;q&#39;),event,&#39;www.blogjava.net/yongboy&#39;)">&nbsp;<input onclick="SearchGoogle(document.getElementById(&#39;q&#39;),event,&#39;www.blogjava.net/yongboy&#39;)" type="button" value="搜索" name="sa">
+	</li>
+</ul>
+
+<h3>最新评论
+	<a id="SingleColumn1__1bb9aea_RSSHyperlink1" href="http://www.blogjava.net/yongboy/CommentsRSS.aspx"><img src="./随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava_files/xml.gif" style="border-width:0px;"></a></h3>
+<div class="RecentComment">
+	
+			<ul>
+		
+			<li style="word-break:break-all">
+				<a id="SingleColumn1__1bb9aea_CommentList_ctl01_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2017/01/10/409689.html#432258">1.&nbsp;re: MQTT协议笔记之发布流程</a>
+			</li>
+			<li style="word-break:break-all">
+				评论内容较长,点击标题查看
+			</li>
+			<li style="text-align:right;margin-right:4px">
+				--Haven</li>
+		
+			<li style="word-break:break-all">
+				<a id="SingleColumn1__1bb9aea_CommentList_ctl02_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2017/01/05/409689.html#432243">2.&nbsp;re: MQTT协议笔记之发布流程</a>
+			</li>
+			<li style="word-break:break-all">
+				评论内容较长,点击标题查看
+			</li>
+			<li style="text-align:right;margin-right:4px">
+				--nieyong</li>
+		
+			<li style="word-break:break-all">
+				<a id="SingleColumn1__1bb9aea_CommentList_ctl03_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2016/12/27/409689.html#432184">3.&nbsp;re: MQTT协议笔记之发布流程</a>
+			</li>
+			<li style="word-break:break-all">
+				博主牛人呀，有一个QoS2的问题请教，为什么QoS2需要4次包，2次不就可以了吗？还望回复。
+			</li>
+			<li style="text-align:right;margin-right:4px">
+				--Haven</li>
+		
+			<li style="word-break:break-all">
+				<a id="SingleColumn1__1bb9aea_CommentList_ctl04_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2016/08/19/431601.html#431642">4.&nbsp;re: Tsung笔记之IP地址和端口限制突破篇</a>
+			</li>
+			<li style="word-break:break-all">
+				评论内容较长,点击标题查看
+			</li>
+			<li style="text-align:right;margin-right:4px">
+				--nieyong</li>
+		
+			<li style="word-break:break-all">
+				<a id="SingleColumn1__1bb9aea_CommentList_ctl05_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2016/08/18/431601.html#431628">5.&nbsp;re: Tsung笔记之IP地址和端口限制突破篇</a>
+			</li>
+			<li style="word-break:break-all">
+				博主，请问下<br>最新版1.6.1版本什么时候发布啊，最近工作需要对TCP协议做性能测试
+			</li>
+			<li style="text-align:right;margin-right:4px">
+				--王大</li>
+		
+			</ul>
+		
+</div>
+
+<h3>阅读排行榜</h3>
+<div class="RecentComment">
+	
+			<ul style="word-break:break-all">
+		
+			<li>
+				<a id="SingleColumn1__7f5a41_TopList_ctl01_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2013/12/12/407498.html">1.&nbsp;Docker学习笔记之一，搭建一个JAVA Tomcat运行环境(90783)</a>
+			</li>
+		
+			<li>
+				<a id="SingleColumn1__7f5a41_TopList_ctl02_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2009/09/04/293900.html">2.&nbsp;java war 打包、解压命令(73020)</a>
+			</li>
+		
+			<li>
+				<a id="SingleColumn1__7f5a41_TopList_ctl03_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2014/03/05/410636.html">3.&nbsp;微信协议简单调研笔记(58257)</a>
+			</li>
+		
+			<li>
+				<a id="SingleColumn1__7f5a41_TopList_ctl04_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2013/05/13/399203.html">4.&nbsp;100万并发连接服务器笔记之Java Netty处理1M连接会怎么样(50612)</a>
+			</li>
+		
+			<li>
+				<a id="SingleColumn1__7f5a41_TopList_ctl05_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2013/08/26/403325.html">5.&nbsp;服务器操作系统CoreOS初体验(46509)</a>
+			</li>
+		
+			</ul>
+		
+</div>
+
+<h3>评论排行榜</h3>
+<div class="RecentComment">
+	
+			<ul style="word-break:break-all">
+		
+			<li>
+				<a id="SingleColumn1__344d45f_TopList_ctl01_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2014/03/05/410636.html">1.&nbsp;微信协议简单调研笔记(22)</a>
+			</li>
+		
+			<li>
+				<a id="SingleColumn1__344d45f_TopList_ctl02_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2013/12/12/407498.html">2.&nbsp;Docker学习笔记之一，搭建一个JAVA Tomcat运行环境(19)</a>
+			</li>
+		
+			<li>
+				<a id="SingleColumn1__344d45f_TopList_ctl03_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2014/12/12/421331.html">3.&nbsp;MQTT 3.1协议非严肃反思录(17)</a>
+			</li>
+		
+			<li>
+				<a id="SingleColumn1__344d45f_TopList_ctl04_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2014/11/09/419829.html">4.&nbsp;为什么批量请求要尽可能的合并操作(17)</a>
+			</li>
+		
+			<li>
+				<a id="SingleColumn1__344d45f_TopList_ctl05_Hyperlink1" href="http://www.blogjava.net/yongboy/archive/2014/04/12/412351.html">5.&nbsp;MQTT协议笔记之订阅(16)</a>
+			</li>
+		
+			</ul>
+		
+</div>
+
+					
+<div id="footer">
+	Powered by: 
+	<br>
+	
+	<a id="Footer1_Hyperlink3" name="Hyperlink1" href="http://www.blogjava.net/" style="font-family:Verdana;font-size:12px;">BlogJava</a>
+	<br>
+	Copyright © nieyong
+</div>
+				
+			</div>			
+			
+	
+
+    
+<script type="text/javascript">
+//<![CDATA[
+var Page_ValidationSummaries =  new Array(document.getElementById("AjaxHolder_PostComment_ValidationSummary1"));
+//]]>
+</script>
+
+<script type="text/javascript">
+//<![CDATA[
+var AjaxHolder_PostComment_ValidationSummary1 = document.all ? document.all["AjaxHolder_PostComment_ValidationSummary1"] : document.getElementById("AjaxHolder_PostComment_ValidationSummary1");
+AjaxHolder_PostComment_ValidationSummary1.showmessagebox = "True";
+AjaxHolder_PostComment_ValidationSummary1.showsummary = "False";
+//]]>
+</script>
+
+
+<script type="text/javascript">
+//<![CDATA[
+
+document.getElementById('AjaxHolder_PostComment_ValidationSummary1').dispose = function() {
+    Array.remove(Page_ValidationSummaries, document.getElementById('AjaxHolder_PostComment_ValidationSummary1'));
+}
+Sys.Application.initialize();
+//]]>
+</script>
+</form>
+    <script type="text/javascript" src="./随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava_files/ShowHidden.js.下载"></script>
+	<script type="text/javascript">
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-476124-3']);
+	  _gaq.push(['_trackPageview']);
+
+	  (function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+	</script>
+
+
+<iframe id="google_osd_static_frame_4428145874043" name="google_osd_static_frame" style="display: none; width: 0px; height: 0px;" src="./随手记之TCP Keepalive笔记 - 聂永的博客 - BlogJava_files/saved_resource(1).html"></iframe><st-div id="__selection-translator__"> <st-div class="__st-box__" style="display: none; position: fixed; z-index: 99999; left: 0px; top: 0px; transform: translateX(71px) translateY(115px);"> <st-header> <st-span class="st-icon-pin" title="固定"></st-span> <st-span class="st-icon-down-open" title="展开"></st-span> <st-span class="st-icon-cog" title="设置"></st-span> </st-header> <st-div class="__query-form__" style="display: none;"> <st-div> <textarea placeholder="输入要翻译的句子或单词"></textarea> </st-div> <st-div> <select> <option value="">自动判断</option> <option value="zh">中文</option><option value="zh-CN">中文(简体)</option><option value="zh-HK">中文(香港)</option><option value="zh-TW">中文(繁体)</option><option value="en">英语</option><option value="ja">日语</option><option value="ko">朝鲜语</option><option value="de">德语</option><option value="fr">法语</option><option value="ru">俄语</option><option value="th">泰语</option><option value="af">南非语</option><option value="ar">阿拉伯语</option><option value="az">阿塞拜疆语</option><option value="be">比利时语</option><option value="bg">保加利亚语</option><option value="ca">加泰隆语</option><option value="cs">捷克语</option><option value="cy">威尔士语</option><option value="da">丹麦语</option><option value="dv">第维埃语</option><option value="el">希腊语</option><option value="eo">世界语</option><option value="es">西班牙语</option><option value="et">爱沙尼亚语</option><option value="eu">巴士克语</option><option value="fa">法斯语</option><option value="fi">芬兰语</option><option value="fo">法罗语</option><option value="gl">加里西亚语</option><option value="gu">古吉拉特语</option><option value="he">希伯来语</option><option value="hi">印地语</option><option value="hr">克罗地亚语</option><option value="hu">匈牙利语</option><option value="hy">亚美尼亚语</option><option value="id">印度尼西亚语</option><option value="is">冰岛语</option><option value="it">意大利语</option><option value="ka">格鲁吉亚语</option><option value="kk">哈萨克语</option><option value="kn">卡纳拉语</option><option value="kok">孔卡尼语</option><option value="ky">吉尔吉斯语</option><option value="lt">立陶宛语</option><option value="lv">拉脱维亚语</option><option value="mi">毛利语</option><option value="mk">马其顿语</option><option value="mn">蒙古语</option><option value="mr">马拉地语</option><option value="ms">马来语</option><option value="mt">马耳他语</option><option value="nb">挪威语(伯克梅尔)</option><option value="nl">荷兰语</option><option value="ns">北梭托语</option><option value="pa">旁遮普语</option><option value="pl">波兰语</option><option value="pt">葡萄牙语</option><option value="qu">克丘亚语</option><option value="ro">罗马尼亚语</option><option value="sa">梵文</option><option value="se">北萨摩斯语</option><option value="sk">斯洛伐克语</option><option value="sl">斯洛文尼亚语</option><option value="sq">阿尔巴尼亚语</option><option value="sv">瑞典语</option><option value="sw">斯瓦希里语</option><option value="syr">叙利亚语</option><option value="ta">泰米尔语</option><option value="te">泰卢固语</option><option value="tl">塔加路语</option><option value="tn">茨瓦纳语</option><option value="tr">土耳其语</option><option value="ts">宗加语</option><option value="tt">鞑靼语</option><option value="uk">乌克兰语</option><option value="ur">乌都语</option><option value="uz">乌兹别克语</option><option value="vi">越南语</option><option value="xh">班图语</option><option value="zu">祖鲁语</option> </select> <st-div class="__exchange__"> <st-span class="st-icon-exchange"></st-span> </st-div> <select> <option value="">自动选择</option> <option value="zh">中文</option><option value="zh-CN">中文(简体)</option><option value="zh-HK">中文(香港)</option><option value="zh-TW">中文(繁体)</option><option value="en">英语</option><option value="ja">日语</option><option value="ko">朝鲜语</option><option value="de">德语</option><option value="fr">法语</option><option value="ru">俄语</option><option value="th">泰语</option><option value="af">南非语</option><option value="ar">阿拉伯语</option><option value="az">阿塞拜疆语</option><option value="be">比利时语</option><option value="bg">保加利亚语</option><option value="ca">加泰隆语</option><option value="cs">捷克语</option><option value="cy">威尔士语</option><option value="da">丹麦语</option><option value="dv">第维埃语</option><option value="el">希腊语</option><option value="eo">世界语</option><option value="es">西班牙语</option><option value="et">爱沙尼亚语</option><option value="eu">巴士克语</option><option value="fa">法斯语</option><option value="fi">芬兰语</option><option value="fo">法罗语</option><option value="gl">加里西亚语</option><option value="gu">古吉拉特语</option><option value="he">希伯来语</option><option value="hi">印地语</option><option value="hr">克罗地亚语</option><option value="hu">匈牙利语</option><option value="hy">亚美尼亚语</option><option value="id">印度尼西亚语</option><option value="is">冰岛语</option><option value="it">意大利语</option><option value="ka">格鲁吉亚语</option><option value="kk">哈萨克语</option><option value="kn">卡纳拉语</option><option value="kok">孔卡尼语</option><option value="ky">吉尔吉斯语</option><option value="lt">立陶宛语</option><option value="lv">拉脱维亚语</option><option value="mi">毛利语</option><option value="mk">马其顿语</option><option value="mn">蒙古语</option><option value="mr">马拉地语</option><option value="ms">马来语</option><option value="mt">马耳他语</option><option value="nb">挪威语(伯克梅尔)</option><option value="nl">荷兰语</option><option value="ns">北梭托语</option><option value="pa">旁遮普语</option><option value="pl">波兰语</option><option value="pt">葡萄牙语</option><option value="qu">克丘亚语</option><option value="ro">罗马尼亚语</option><option value="sa">梵文</option><option value="se">北萨摩斯语</option><option value="sk">斯洛伐克语</option><option value="sl">斯洛文尼亚语</option><option value="sq">阿尔巴尼亚语</option><option value="sv">瑞典语</option><option value="sw">斯瓦希里语</option><option value="syr">叙利亚语</option><option value="ta">泰米尔语</option><option value="te">泰卢固语</option><option value="tl">塔加路语</option><option value="tn">茨瓦纳语</option><option value="tr">土耳其语</option><option value="ts">宗加语</option><option value="tt">鞑靼语</option><option value="uk">乌克兰语</option><option value="ur">乌都语</option><option value="uz">乌兹别克语</option><option value="vi">越南语</option><option value="xh">班图语</option><option value="zu">祖鲁语</option> </select> </st-div> <st-div> <select> <option value="YouDao">有道翻译</option> <option value="BaiDu">百度翻译</option> <option value="Bing">必应翻译</option> <option value="Google">谷歌翻译</option> <option value="GoogleCN">谷歌翻译（国内）</option> </select> <st-div class="__action-list__"> <st-div class="__button__ __btn-translate__">翻译 <st-span class="st-icon-down-dir"></st-span> </st-div> <st-div class="__expand__"> <st-div class="__button__">朗读</st-div> <st-div class="__button__">复制</st-div> </st-div> </st-div> </st-div> </st-div> <st-div class="__translate-result__" style="display: none;">正在查询，请稍候……</st-div> <st-div class="__translate-result__"> <st-div style="display: none;"> <st-span></st-span> <st-span class="__retry__">重试</st-span> </st-div> <st-div> <st-div class="__phonetic__"> <st-span style="display: none;"></st-span> <st-span class="__copy-and-read__"> <st-span>朗读</st-span> <st-span style="display: none;">复制</st-span> </st-span> </st-div> <st-div style="display: none;"> <st-ul>  </st-ul> <st-div class="__copy-and-read__"> <st-span class="__copy-and-read__">复制</st-span> </st-div> </st-div> <st-div style="display: none;">  <st-div class="__copy-and-read__"> <st-span class="__copy-and-read__">朗读</st-span> <st-span class="__copy-and-read__">复制</st-span> </st-div> </st-div> </st-div> </st-div> <st-footer> <st-span style="display: none;">via <a target="_blank" href="http://www.blogjava.net/yongboy/archive/2015/04/14/424413.html"></a></st-span> </st-footer> </st-div> <st-div class="__st-btn__" style="display: none; position: fixed; z-index: 99999; left: 0px; top: 0px; transform: translateX(71px) translateY(115px);">译</st-div> </st-div></body></html>
