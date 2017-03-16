@@ -4,8 +4,31 @@
     <meta charset="UTF-8">
     <title>单词</title>
     <style type="text/css">
+        html,body {
+            padding:0;
+            margin:0;
+            height: 100%;
+        }
+
+        ol.wrap {
+/*            display: flex;
+            flex-flow: column wrap;
+            height: 100%;*/
+            margin-left: 50px;
+        }
         .fanyi {
+            margin-left: 20px;
             background-color: black;
+            cursor: pointer;
+        }
+        .showFanyi {
+            background-color: white;
+        }
+        .randomButton {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            color: red;
         }
         li {
             height: 40px;
@@ -14,128 +37,114 @@
     </style>
 </head>
 <body>
-    <ol>
-        <li>
-            hypothetical 
-            <span class="fanyi">假想</span>
-        </li>
-        <li>
-            primitive 
-            <span class="fanyi">原始</span>
-        </li>
-        <li>
-            adoption 
-            <span class="fanyi">采用</span>
-        </li>
-        <li>
-            radical 
-            <span class="fanyi">激进</span>
-        </li>
-        <li>
-            roughly 
-            <span class="fanyi">大概</span>
-        </li>
-        <li>
-            magnitude 
-            <span class="fanyi">大小</span>
-        </li>
-        <li>
-            radically 
-            <span class="fanyi">根本</span>
-        </li>
-        <li>
-            adjusting 
-            <span class="fanyi">调整</span>
-        </li>
-        <li>
-            modular 
-            <span class="fanyi">模块化</span>
-        </li>
-        <li>
-            distinct 
-            <span class="fanyi">不同</span>
-        </li>
-        <li>
-            convey 
-            <span class="fanyi">传达</span>
-        </li>
-        <li>
-            abbreviations 
-            <span class="fanyi">缩写</span>
-        </li>
-        <li>
-            ambiguous 
-            <span class="fanyi">暧昧，含糊，模糊</span>
-        </li>
-        <li>
-            obfuscated 
-            <span class="fanyi">混淆</span>
-        </li>
-        <li>
-            yields 
-            <span class="fanyi">产量</span>
-        </li>
-        <li>
-            delimit  
-            <span class="fanyi">分隔，划界</span>
-        </li>
-        <li>
-            regress  
-            <span class="fanyi">回退，复原</span>
-        </li>
-        <li>
-            deviates  
-            <span class="fanyi">偏离</span>
-        </li>
-        <li>
-            propagates  
-            <span class="fanyi">传播</span>
-        </li>
-        <li>
-            traffic  
-            <span class="fanyi">运输量，流量</span>
-        </li>
-        <li>
-            conventions  
-            <span class="fanyi">约定（命名）</span>
-        </li>
-        <li>
-            resemble   
-            <span class="fanyi">类似</span>
-        </li>
-        <li>
-            embraced    
-            <span class="fanyi">拥抱</span>
-        </li>
-        <li>
-            Pinterest     
-            <span class="fanyi">照片分享网站(由pin图钉和Interest兴趣组成)</span>
-        </li>
-        <li>
-            scaling      
-            <span class="fanyi">缩放</span>
-        </li>
-        <li>
-            appealing      
-            <span class="fanyi">吸引人</span>
-        </li>
-        <li>
-            surveys       
-            <span class="fanyi">调查</span>
-        </li>
-        <li>
-            legacy       
-            <span class="fanyi">调查</span>
-        </li>
-        <li>
-            transition       
-            <span class="fanyi">过渡</span>
-        </li>
-        <li>
-            dedicated       
-            <span class="fanyi">专门，专用</span>
-        </li>
-    </ol>
-    
+    <button class="randomButton" onclick="random()">重排顺序</button> 
 </body>
+<script type="text/javascript">
+    var danci = {
+        hypothetical: "假想",
+        primitive: "原始",
+        adoption: "采用",
+        radical: "激进",
+        roughly: "大概",
+        magnitude: "大小",
+        radically: "根本",
+        adjusting: "调整",
+        modular: "模块化",
+        distinct: "不同",
+        convey: "传达",
+        abbreviations: "缩写",
+        ambiguous: "暧昧，含糊，模糊",
+        obfuscated: "混淆",
+        yields: "产量",
+        delimit: "分隔,划界",
+        regress: "回退，复原",
+        deviates: "偏离",
+        propagates: "传播",
+        traffic: "运输量,流量",
+        conventions: "约定（命名）",
+        resemble: "类似",
+        embraced: "拥抱",
+        Pinterest: "照片分享网站(由pin图钉和Interest兴趣组成)",
+        scaling: "缩放",
+        appealing: "吸引人",
+        surveys: "调查",
+        legacy: "遗产",
+        transition: "过渡",
+        dedicated: "专门,专用",
+        nutshell: "简而言之",
+        absent: "缺席的",
+        accumulation: "积累",
+        comprehensive: "综合的",
+        refactoring: "重构",
+        substantial: "大量的",
+        typeface: "字体",
+    };
+    var curFanyi = [];
+    function removefromCur(e) {
+        if (curFanyi.indexOf(e) > -1) {
+            curFanyi.splice(curFanyi.indexOf(e), 1);
+        }
+    }
+    function closeAll() {
+        curFanyi.forEach(function(e) {
+            e.classList.remove("showFanyi");
+        })
+        curFanyi = [];
+    }
+    document.body.addEventListener("click", function(e) {
+        var target = e.target;
+        if (curFanyi.length > 0 && !target.classList.contains("fanyi")) {
+            closeAll();
+        } else if (target.classList.contains("fanyi")) {
+            if (!target.classList.contains("showFanyi")) {
+                curFanyi.push(target);
+            } else {
+                removefromCur(curFanyi);
+            }
+            target.classList.toggle("showFanyi");
+        }
+    })
+    function createTree(keyArr) {
+        var ol = document.createElement("ol");
+        ol.className = "wrap";
+        keyArr.forEach(function(key) {
+            var 
+                mean = danci[key],
+                li = document.createElement("li"),
+                spanKey = document.createElement("span"),
+                spanMean = document.createElement("span");
+            li.className = "eachli";
+            spanKey.className = "eachli";
+            spanKey.textContent = key;
+            spanMean.className = "fanyi";
+            spanMean.textContent = mean;
+            li.appendChild(spanKey);
+            li.appendChild(spanMean);
+            ol.appendChild(li);
+        })
+        var oldOl = document.querySelector(".wrap");
+        if (oldOl) {
+            oldOl.parentNode.replaceChild(ol, oldOl);
+        } else {
+            document.body.appendChild(ol);
+        }   
+    }
+    function ran(min, max) {
+        return Math.floor(min + Math.random() * (max - min + 1));
+    }
+    var after;
+    function random(len) {
+        after = after || Object.keys(danci);
+        var ar = after,
+            len = ar.length;
+        for (var i = 0; i < len; i++) {
+            var index = ran(i, len - 1);
+            var tmp = ar[index];
+            ar[index] = ar[i];
+            ar[i] = tmp;
+        }
+        createTree(ar);
+    }
+    createTree(Object.keys(danci));
+</script>
 </html>
