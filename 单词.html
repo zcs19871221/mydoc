@@ -9,7 +9,10 @@
             margin:0;
             height: 100%;
         }
-
+        body {
+            display: flex;
+            justify-content: space-between;
+        }
         ol.wrap {
 /*            display: flex;
             flex-flow: column wrap;
@@ -78,7 +81,24 @@
         refactoring: "重构",
         substantial: "大量的",
         typeface: "字体",
+        semantics : "语义",
+        colon : "冒号",
+        poll: "轮询",
+        exclusively: "仅仅，只，独占的",
+        "extent to a certent extent": "程度",
+        utilize: "利用",
+        horizontal : "水平",
+        vertical: "垂直",
+        adjacent: "相邻",
+        above: "在...之上",
+        metric: "度量(标准)",
+        abstracts: "摘要",
+        rapid: "快速",
+        illustrated: "插图",
+        "side effects": "副作用",
+        "outline": "轮廓,概述",
     };
+    var notMemory = {};
     var curFanyi = [];
     function removefromCur(e) {
         if (curFanyi.indexOf(e) > -1) {
@@ -90,6 +110,27 @@
             e.classList.remove("showFanyi");
         })
         curFanyi = [];
+    }
+    function removeFromDanciObj(obj, key) {
+        var del = {};
+        for (var _key in obj) {
+            if (_key === key) {
+                del[_key] = obj[_key];
+                delete obj[_key];
+                break;
+            }
+        }
+        return del;
+    }
+    function addToDanciObj(obj, add) {
+        var addType = {}.toString.call(add);
+        for (var _key in add) {
+            if (obj[_key]) {
+                return alert("重复key!");
+            } 
+            obj[_key] = add[_key];
+        }
+        add = null;
     }
     document.body.addEventListener("click", function(e) {
         var target = e.target;
@@ -104,12 +145,31 @@
             target.classList.toggle("showFanyi");
         }
     })
-    function createTree(keyArr) {
+    document.body.addEventListener("dblclick", function(e) {
+        var target = e.target,
+            className = target.className,
+            key;
+        if (className === "eachli" && target.nodeName.toLowerCase() === "span") {
+            key = target.textContent;
+        } else {
+            do {
+                target = target.parentNode; 
+            } while (target && target.className === "eachli" && target.nodeName.toLowerCase() === "span")
+            if (target) {
+                key = target.firstChild.textContent;
+            }
+        }
+        if (key) {
+            addToDanciObj(notMemory, removeFromDanciObj(danci, key));
+            reCreate();
+        }
+    })
+    function createTree(keyArr, obj, type) {
         var ol = document.createElement("ol");
         ol.className = "wrap";
         keyArr.forEach(function(key) {
             var 
-                mean = danci[key],
+                mean = obj[key],
                 li = document.createElement("li"),
                 spanKey = document.createElement("span"),
                 spanMean = document.createElement("span");
@@ -122,12 +182,21 @@
             li.appendChild(spanMean);
             ol.appendChild(li);
         })
-        var oldOl = document.querySelector(".wrap");
-        if (oldOl) {
-            oldOl.parentNode.replaceChild(ol, oldOl);
-        } else {
-            document.body.appendChild(ol);
-        }   
+        if (type === "danci") {
+            var oldOl = document.querySelector(".wrap");
+            if (oldOl) {
+                oldOl.parentNode.replaceChild(ol, oldOl);
+            } else {
+                document.body.appendChild(ol);
+            }     
+        } else if (type == "notMemory") {
+            var oldOl = document.querySelectorAll(".wrap");
+            if (oldOl.length === 2) {
+                oldOl[1].parentNode.replaceChild(ol, oldOl[1]);
+            } else {
+                document.body.appendChild(ol);
+            }  
+        }
     }
     function ran(min, max) {
         return Math.floor(min + Math.random() * (max - min + 1));
@@ -143,8 +212,12 @@
             ar[index] = ar[i];
             ar[i] = tmp;
         }
-        createTree(ar);
+        createTree(ar, danci, "danci");
     }
-    createTree(Object.keys(danci));
+    function reCreate() {
+        createTree(Object.keys(danci), danci, "danci");
+        createTree(Object.keys(notMemory), notMemory, "notMemory");
+    }
+    reCreate();
 </script>
 </html>
