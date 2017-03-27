@@ -1,6 +1,6 @@
 # nodejs源代码
 源代码位置：lib/_http_agent.js
-    
+​    
     //当有套接字(socket空闲时触发)
     self.on('free', function(socket, options) {
       var name = self.getName(options);
@@ -50,13 +50,16 @@
       }
     });
 
-  总结一下，只要用了agent，
+# 总结一下，只要用了agent，
   1. 当socket空闲下来，只要有未分配的请求，都会进行复用，不管设置没设置keepalive。
   2. 如果当前没有未分配的请求
       1. 如果设置了keepalive，会根据maxSockets和freeSockets参数判断是否把这个socket暂存到freeSockets队列等待以后使用，并开启操作系统的TCP的keepalive功能。
       2. 如果没设置keepalive，这个空闲的socket直接干掉
 
+
 # 测试代码
+server.js是服务端代码，send是客户端。当服务端设置
+
 server.js
 
     var http = require("http");
