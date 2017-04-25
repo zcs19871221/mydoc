@@ -115,6 +115,10 @@
             "inconspicuous": "不起眼的",
             "consistency": "一致性",
             "suppress ": "压制",
+            "compensate": "补偿",
+            "inadequate": "不足",
+            "resolution": "分辨率",
+            "complement": "补充",
         };
         var notMemory = {};
         var curFanyi = [];
@@ -226,6 +230,7 @@
             return Math.floor(min + Math.random() * (max - min + 1));
         }
         var after;
+        var _ar;
         function random(len) {
             after = after || Object.keys(danci);
             var ar = after,
@@ -236,10 +241,11 @@
                 ar[index] = ar[i];
                 ar[i] = tmp;
             }
+            _ar = ar;
             createTree(ar, danci, "danci");
         }
         function reCreate() {
-            createTree(Object.keys(danci), danci, "danci");
+            createTree(_ar || Object.keys(danci), danci, "danci");
             createTree(Object.keys(notMemory), notMemory, "notMemory");
         }
         reCreate();
