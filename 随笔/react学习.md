@@ -91,3 +91,70 @@ class x extends React.Component {
       </p>
       】
     </FancyBorder>
+
+# 关于更新引用对象，比如列表中的对象属性
+1. 如果直接更改state而不是用不要setState可能会有问题：
+比如更改后，没有立即调用setState（因为是异步的），而是随后别其他的调用，有可能被刷掉。
+
+# 如何决定是props还是state
+1. 从父组件传递的props不会是state
+2. 随时间不改变的不是state
+3. 可以根据其他state计算出来的不是state
+
+# 如何决定一个state是属于子元素还是父元素
+1. 辨识出每个要基于这个state渲染的组件
+2. 找出从层级结构上属于上面找出的所有组件的父元素的组件。
+3. 这个共同拥有组件者或者更高层级的拥有这个state。
+4. 如果你找不到一个合理的拥有它的组件，那么就创建一个新的拥有者组件，并且放到第一步找到的组件的层级上面。
+Identify every component that renders something based on that state.
+Find a common owner component (a single component above all the components that need the state in the hierarchy).
+Either the common owner or another component higher up in the hierarchy should own the state.
+If you can't find a component where it makes sense to own the state, create a new component simply for holding the state and add it somewhere in the hierarchy above the common owner component.
+
+# jsx语法
+1.jsx元素不能使用表达式，可以使用大写的变量
+
+    const SpecificStory = components[props.storyType];
+     return <SpecificStory story={props.story} />;
+
+2. props默认值是true
+
+3. jsx中的字符串会做trim，去除空白行，首尾的换行，文字中的换行会看做空格。
+4. {}设置函数可以作为函数参数传递props.childen
+  
+    function Repeat(props) {
+      let items = [];
+      for (let i = 0; i < props.numTimes; i++) {
+        items.push(props.children(i));
+      }
+      return <div>{items}</div>;
+    }
+
+    function ListOfTenThings() {
+      return (
+        <Repeat numTimes={10}>
+          {(index) => <div key={index}>This is item {index} in the list</div>}
+        </Repeat>
+      );
+    }
+5. false, true, null, or undefined这几个值在{}输出的时候不会渲染。但是0会
+
+# ref控制原生dom
+通过设置标签属性ref,设置一个回调：elem => {}回调的第一个参数就是元素。还可以通过在父组件中设置回调并传递的方式把dom元素保存在父组件中。
+
+# defaultValue多用于非控制组件设置初始值（非控制组件就是不设置value和回调的函数，用ref原生控制dom）
+
+# react核心
+react的核心就是每次render全部的dom。这样简单但是对性能要求高。
+但是从一棵树转变成另一棵树的复杂度是o(n3)，通过算法从n3的复杂度降低到了o(n).
+基于这样的假设：
+1. 同样类的两个组件创建相同的树，不同类的组件创建不同的树
+2. 在整个渲染过程中给元素创建一个唯一值。
+
+所以这样做比较好：
+1. 如果两次渲染过程中改变了一个组件的类，那么就会不太好
+2. 给元素一个稳定不变，唯一的Id可以提高效率。key="xxx".但如果key不是唯一值的话，会有问题。
+
+# 如何增加性能
+1. 通过设置shouldComponentUpdate方法，返回true或者false决定是否更新组件。
+2. 不继承Component而是继承PureComponent的话，会自动检查state和props，如果相等就不会进行渲染。但是这样如果更新数组或对象的话，是不会比较出来的。所以要使用immutable库或者Object.assign({}, oldObject);或者[].slice方法改变引用，让程序认为是完全改变了，好触发render方法。
