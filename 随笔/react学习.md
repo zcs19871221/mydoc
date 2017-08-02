@@ -22,18 +22,17 @@
 
 # 组件状态和周期函数
 
-class x extends React.Component {
-    componentDidMount() {
+    class x extends React.Component {
+        componentDidMount() {
+        }
+        componentWillUnmount() {
+          clearInterval(this.timerID);
+        }
+        render() {
+            return 
+        }
+    }
 
-    }
-    componentWillUnmount() {
-      clearInterval(this.timerID);
-    }
-    render() {
-        return 
-    }
-
-}
 0. 组件通过`class A extends React.component`的方法实现更多的方法。（相比较用简单函数）
 1. 组件的构造函数必须执行`super(props);`
 1. class类型组件的调用过程
@@ -58,7 +57,7 @@ class x extends React.Component {
 ## 如何渲染列表元素
 1. 直接在{}表达式中输出一个列表就行了，每一个项目是一个元素。
 2. 必须在每一个列表项目中设置一个属性key相对他的兄弟元素独一无二的值，是为了react使用。
-3. 在{}可以用任意表达式。
+3. 在{}内可以用任意表达式。
 ## jsx中如何处理input，select等form元素以及模拟双向绑定。
 ### 单向数据输出
 1. input,textarea设置value={this.state.xx}
@@ -158,3 +157,61 @@ react的核心就是每次render全部的dom。这样简单但是对性能要求
 # 如何增加性能
 1. 通过设置shouldComponentUpdate方法，返回true或者false决定是否更新组件。
 2. 不继承Component而是继承PureComponent的话，会自动检查state和props，如果相等就不会进行渲染。但是这样如果更新数组或对象的话，是不会比较出来的。所以要使用immutable库或者Object.assign({}, oldObject);或者[].slice方法改变引用，让程序认为是完全改变了，好触发render方法。
+
+# api相关
+render是纯函数。交互最好放到其他周期函数中。
+componentWillMount设置setState不会触发重新渲染。
+componentDidMount适宜执行读取数据，初始化网络请求。设置setState会触发重新渲染。
+
+顺序
+componentWillMount componentWillUpdate render mountDom componentDidMount
+
+# 除了aria-*和data-*属性外，其他所欲属性都变成驼峰命名
+dom属性：
+checked
+htmlFor
+selected
+style：对象
+
+    accept acceptCharset accessKey action allowFullScreen allowTransparency alt
+    async autoComplete autoFocus autoPlay capture cellPadding cellSpacing challenge
+    charSet checked cite classID className colSpan cols content contentEditable
+    contextMenu controls coords crossOrigin data dateTime default defer dir
+    disabled download draggable encType form formAction formEncType formMethod
+    formNoValidate formTarget frameBorder headers height hidden high href hrefLang
+    htmlFor httpEquiv icon id inputMode integrity is keyParams keyType kind label
+    lang list loop low manifest marginHeight marginWidth max maxLength media
+    mediaGroup method min minLength multiple muted name noValidate nonce open
+    optimum pattern placeholder poster preload profile radioGroup readOnly rel
+    required reversed role rowSpan rows sandbox scope scoped scrolling seamless
+    selected shape size sizes span spellCheck src srcDoc srcLang srcSet start step
+    style summary tabIndex target title type useMap value width wmode wrap
+
+# react事件
+默认对象属性
+
+    boolean bubbles
+    boolean cancelable
+    DOMEventTarget currentTarget
+    boolean defaultPrevented
+    number eventPhase
+    boolean isTrusted
+    DOMEvent nativeEvent
+    void preventDefault()
+    boolean isDefaultPrevented()
+    void stopPropagation()
+    boolean isPropagationStopped()
+    DOMEventTarget target
+    number timeStamp
+    string type
+
+# react的事件回调结束后会回收，因此异步方法不能再次访问event对象除非调用event.persist()
+
+# react默认事件捕获于冒泡阶段，如果想在捕获阶段的话，添加Capture用使用onClickCapture
+
+# react-router
+    <Route path="/user/:username" component={User}/>
+    const User = ({ match }) => {
+      return <h1>Hello {match.params.username}!</h1>
+    }
+如果component中是函数的话，每次匹配都会进行渲染，就会创建一个新的组件。
