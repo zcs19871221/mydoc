@@ -1,6 +1,6 @@
 # react组件和生存周期
 [原文地址](https://facebook.github.io/react/docs/react-component.html)
-![](./image/react-lifecycle.jpg)
+![](../image/react-lifecycle.jpg)
 只要看这张图就够了。第二行的行为是更新时候执行的函数，和第一行初始化是隔离的。就是第一行不会执行第二行的函数，反之亦然。
 网络请求可在componentDidUpdate和componentDidMount里请求。
 ## TL;DR
