@@ -5,9 +5,10 @@
 2. jsx表达式解释后返回的是一个js对象。
 3. jsx中html标签的属性和html有区别，使用骆驼形式写法`tabindex becomes tabIndex.`
 4. 以html形式写jsx和通过React.createElement是一样的。
+5. jsx中的js表达式用{}包装，字符串可以直接写attr="attr"
 
 # 元素
-1. 元素都是不可变对象，只能通过render改变。但是建议只用一次render
+1. 元素都是不可变对象，只能通过render改变。但是建议只定义一个render
 
 # 组件
 组件把元素切分成一个一个独立，可复用的UI。
@@ -49,14 +50,14 @@
 # jsx事件
 1. 事件名称是骆驼命名，基于[w3c标准](https://www.w3.org/TR/DOM-Level-3-Events/)
 2. 必须使用preventDefault来取消默认，return false不可以。
-3. 事件函数中的this必须手动绑定，默认是undefined; 常见做法是在class中命名公用方法，然后在constructor中命名this.fn = fn.bind(this);这样绑定到this。
+3. 事件函数中的this必须手动绑定，默认是undefined; 常见做法是在class中命名公用方法，然后在constructor中命名this.fn = fn.bind(this);这样绑定到this。更好的方法是使用箭头函数，自动绑定this到环境this。
 
 # jsx语法中的逻辑和嵌套
-可以在component中使用js语法来决定render哪些元素，也可以在jsx表达式中直接使用&&和三目表达式实现逻辑判断。
+可以在component中使用js语法来决定render哪些元素，也可以在jsx表达式中直接使用&&和三目表达式实现逻辑判断。最好用{hasXX && XX}的方式，不会影响组件的相对位置，其他组件不会从新渲染。
 
 ## 如何渲染列表元素
 1. 直接在{}表达式中输出一个列表就行了，每一个项目是一个元素。
-2. 必须在每一个列表项目中设置一个属性key相对他的兄弟元素独一无二的值，是为了react使用。
+2. 必须在每一个列表项目中设置一个属性key相对他的兄弟元素独一无二的值，是为了react使用。（为了复用，最好是根据内容决定的id，这样即使位置改变也不会有问题）
 3. 在{}内可以用任意表达式。
 ## jsx中如何处理input，select等form元素以及模拟双向绑定。
 ### 单向数据输出
@@ -215,3 +216,205 @@ style：对象
       return <h1>Hello {match.params.username}!</h1>
     }
 如果component中是函数的话，每次匹配都会进行渲染，就会创建一个新的组件。
+
+# 我的ajax和组件组织
+1. 所有ajax请求封装在ajaxHoc高阶组件中。
+2. 给ajaxHoc高阶组件传递ajaxConfig和resCb，ajaxConfig当不同的时候，调用ajax请求。当ajax数据返回的时候，调用resCb处理数据，传递给下面的组件。resCb返回值必须是对象，如果没有resCb的话，默认放到下面组件的ajaxData属性中。
+3. 高阶组件初始化一次后，一直使用。再次触发请求根据props的ajaxConfig是否相同和reLoad判断。
+3. 对于table和filter结合的情况：
+    1. 只设置最小化的state
+    2. 设置ajaxHoc的config为一个定制，只根据需要触发的时候，改变config值，发送请求。
+    2. 设置触发ajax请求函数：根据当前state计算提供给ajaxHoc组件的ajaxConfig，全新的config，然后设置state为isSearching = true。这样在更新的时候，HOC组件发现config变了，自动发送请求。
+    3. 把table包装在WrapTable组件中，做一些通用处理。
+
+# react组件开发心得
+1. 确定输入props
+2. 查看可能的交互
+3. 根据交互决定状态state
+4. 根据交互决定输出-对其他组件的反馈（其他组件通过props传递的回调函数）
+5. 确定props,state的类型
+6. 确定props的默认值
+7. 确定state的初始化值
+    1. state在constructor中初始化
+    2. state在componentWillReceiveProps中是否要初始化值
+
+# react渲染相关
+1. 渲染的props尽量不要用箭头函数，因为每次从新渲染组件的时候，箭头函数都会变，相当于传递给子组件的props都会变。都会重新渲染。
+
+比较下面方式1和方式2，方式一每次都会传一个全新的onClick进去,即使是基本组件,也会重新渲染.而如果用方式2,只要e不变,就不会从新渲染.
+react每次渲染都会记忆,并比较.
+
+      {
+          list.map(e => {
+            <!-- 方式1 -->
+            return <div onClick={() => {
+              alert(e);
+            }}></div>
+            <!-- 方士2 -->
+            return <Each data={e}>
+          })
+      }
+      class Each extends React.Component {
+        static propTypes = {
+          data: e
+        }
+        onClick=() => {
+          alert(this.props.data);
+        }
+        render() {
+          return (<div onClick={onClick}>{e}</div>)
+        }
+      }
+
+2. 关于列表迭代的key
+key的作用就是在迭代中告诉组件，如果每次迭代key的值不变，就认为是同一个组件，
+因此不用创建新的组件而是复用这个组件。
+因此key要保证在迭代中的值稳定，而不是每次不一样。
+因此使用key={i}就可以了，有的文章说使用全局唯一值，纯粹胡说八道。
+最好的方法是保持key在当前列表中唯一（根据内容生成固定的key,相同内容生成同样的key），这样可以保证list的顺序就算变了，也不会重复渲染。
+
+
+# react命名
+当父组件向子组件setStaet类型函数的时候，
+不要命名handleEventxxx的形式，因为这时候父组件并不知道子组件要怎么用，
+父组件传递的只是功能性的函数，所以要命名：
+changeXXX 或者setXXX之类的
+
+只有到了最底层组件，涉及真正的事件(click,mouseenter)之类的时候，在子组件里，
+命名函数handleClick(Event)XXX,然后在这里头再调用父组件的setXXX功能函数。
+
+# 选择性渲染优化
+永远不要下面这样,因为这样react每次变化会从新remount所有元素。
+其实并不是会永远remout，而是根据节点的相对位置，比如下面的原来是
+1-c1 2-c2 3-c3，变成了1-c2 2-c3，这样每个位置都变了，所以就会remount所有。
+但是如果显示，隐藏的是c3，就不会从新渲染c1,c2.
+
+    if (this.state.c1) {
+      return (
+        <div>
+          <C1></C1>
+          <C2></C2>
+          <C3></C3>
+        </div>
+      );
+    } else {
+        return (
+          <div>
+            <C2></C2>
+            <C3></C3>
+          </div>
+        );
+    }
+
+要这样：
+        return (
+          <div>
+            {this.state.c1 && <C1></C1>}
+            <C2></C2>
+            <C3></C3>
+          </div>
+        );
+或这样
+
+        let c1 = null;
+        if (this.state.c1) {
+           c1 = C1;
+        }
+        return (
+          <div>
+            {c1}
+            <C2></C2>
+            <C3></C3>
+          </div>
+        );
+因为react会认为这两种的c2和c3位置没有变化而不会触发从新渲染。
+结论：永远不要使用多return语句在你的render方法里，而要使用嵌入的jsx表达式或者变量。
+# 最佳实践
+1. 除了涉及state，lifecycle，性能优化(尽量少用函数组件，用PureComponent替换，提升效率)
+2. propTypes和defaultProps尽量早写，作为文档使用。
+3. 类中的函数如果要绑定this的话，使用箭头函数的方式，因为箭头函数的this是所属环境的。这样省了绑定this了。
+
+    handleSubmit = () => {
+
+    }
+4. 如果setState涉及旧state属性，使用函数
+5. 在render中解构props，优点1.减少this.props的书写 2.减少对索引的搜索。
+
+    const {
+      model,
+      title
+    } = this.props
+
+6. 防止传递新的闭包函数到子组件，因为每次都是一个新函数，会每次re-render
+7. import时候上边是依赖的引用，换行分割依赖引用和本地引用
+8. 组件接收超过两个props的话，分割换行展示
+7. 人家的代码
+
+        import React, { Component } from 'react'
+        import { observer } from 'mobx-react'
+        import { string, object } from 'prop-types'
+        // 分割开本地引用和依赖引用
+        import ExpandableForm from './ExpandableForm'
+        import './styles/ProfileContainer.css'
+
+        // Use decorators if needed
+        @observer
+        export default class ProfileContainer extends Component {
+            state = { expanded: false }
+            // Initialize state here (ES7) or in a constructor method (ES6)
+            
+            // Declare propTypes as static properties as early as possible
+            static propTypes = {
+                model: object.isRequired,
+                title: string
+            }
+
+            // Default props below propTypes
+            static defaultProps = {
+                model: {
+                id: 0
+                },
+                title: 'Your Name'
+            }
+
+            // Use fat arrow functions for methods to preserve context (this will thus be the component instance)
+            handleSubmit = (e) => {
+                e.preventDefault()
+                this.props.model.save()
+            }
+            
+            handleNameChange = (e) => {
+                this.props.model.name = e.target.value
+            }
+            
+            handleExpand = (e) => {
+                e.preventDefault()
+                this.setState(prevState => ({ expanded: !prevState.expanded }))
+            }
+            
+            render() {
+                // Destructure props for readability
+                const {
+                model,
+                title
+                } = this.props
+                return ( 
+                <ExpandableForm 
+                    onSubmit={this.handleSubmit} 
+                    expanded={this.state.expanded} 
+                    onExpand={this.handleExpand}>
+                    // 超过两个props的话，分割换行
+                    <div>
+                    <h1>{title}</h1>
+                    <input
+                        type="text"
+                        value={model.name}
+                        // onChange={(e) => { model.name = e.target.value }}
+                        // Avoid creating new closures in the render method- use methods like below
+                        onChange={this.handleNameChange}
+                        placeholder="Your Name"/>
+                    </div>
+                </ExpandableForm>
+                )
+            }
+        }

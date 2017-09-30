@@ -105,3 +105,10 @@ if (j > 0) {
 n * m matrix convert to an array => matrix[x][y] => a[x * m + y]
 
 an array convert to n * m matrix => a[x] =>matrix[x / m][x % m];
+
+
+# 动态规划问题常用步骤
+1. 做出递归回溯解法
+2. 使用一个缓存表来优化（从上到下动态规划）
+3. 移除要用到的递归（从下到上动态规划）
+4. 最后用一些技巧减少复杂度。
