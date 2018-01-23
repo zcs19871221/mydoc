@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link href="https://cdn.mdn.mozilla.net/static/build/styles/samples.37902ba3b7fe.css" rel="stylesheet" type="text/css" />
+
+    <style type="text/css">
+        #fullscreen:-moz-full-screen {
+            padding: 42px;
+            background-color: pink;
+            border: 2px solid #f00;
+            font-size: 200%;
+        }
+
+        #fullscreen:-webkit-full-screen {
+            padding: 42px;
+            background-color: pink;
+            border: 2px solid #f00;
+            font-size: 200%;
+            /* webkit的实现和其他的不一样，并不放到，只是原大小放到屏幕正中，然后其他的元素弄成黑色 */
+            width: 100%;
+            height: 100%;
+        }
+
+        #fullscreen:-moz-full-screen>h1 {
+            color: red;
+        }
+
+        #fullscreen:-webkit-full-screen>h1 {
+            color: red;
+        }
+
+        #fullscreen:-moz-full-screen>p {
+            color: darkred;
+        }
+
+        #fullscreen:-webkit-full-screen>p {
+            color: darkred;
+        }
+
+        #fullscreen:-moz-full-screen>button {
+            display: none;
+        }
+
+        #fullscreen:-webkit-full-screen>button:not([id="exit"]) {
+            display: none;
+        }
+
+        #fullscreen:fullscreen {
+            padding: 42px;
+            background-color: pink;
+            border: 2px solid #f00;
+            font-size: 200%;
+        }
+
+        #fullscreen:fullscreen>h1 {
+            color: red;
+        }
+
+        #fullscreen:fullscreen>p {
+            color: darkred;
+        }
+
+        #fullscreen:fullscreen>button:not([id="exit"]) {
+            display: none;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div id="fullscreen">
+        <h1>:fullscreen Demo</h1>
+        <p>This text will become big and red when the browser is in fullscreen mode.</p>
+        <button id="fullscreen-button">Enter Fullscreen</button>
+        <button id="exit">Exit Fullscreen</button>
+    </div>
+
+
+    <script type="text/javascript">
+        var fullscreenButton = document.getElementById("fullscreen-button");
+        var exit = document.getElementById("exit");
+        var fullscreenDiv = document.getElementById("fullscreen");
+        var fullscreenFunc = fullscreenDiv.requestFullscreen;
+        var exitFullscreenFunc = document.exitFullscreen;
+        
+        if (!fullscreenFunc) {
+            ['mozRequestFullScreen',
+                'msRequestFullscreen',
+                'webkitRequestFullScreen'].forEach(function (req) {
+                    fullscreenFunc = fullscreenFunc || fullscreenDiv[req];
+                });
+        }
+        if (!exitFullscreenFunc) {
+            ['mozExitFullscreen',
+                'msExitFullscreen',
+                'webkitExitFullscreen'].forEach(function (req) {
+                    console.log(req);
+                    console.log(document[req]);
+                    exitFullscreenFunc = exitFullscreenFunc || document[req];
+                });
+        }
+
+        function enterFullscreen() {
+            fullscreenFunc.call(fullscreenDiv);
+        }
+
+        function exitFullscreen() {
+            exitFullscreenFunc.call(document);
+        }
+
+        fullscreenButton.addEventListener('click', enterFullscreen);
+        exit.addEventListener("click", exitFullscreen);
+    </script>
+
+</body>
+
+</html>

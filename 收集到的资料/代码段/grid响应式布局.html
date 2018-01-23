@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>默认单列，满足条件使用grid</title>
+    <style type="text/css">
+        /* NOTE:
+ * Grid/Flex layout stuff starts at line 187. 
+ * The stuff before is just boring old CSS to make content look not crappy.
+ */
+
+
+/*--------------------------------------------------------------
+CSS Reset
+--------------------------------------------------------------*/
+html {
+	font-family: sans-serif;
+	-webkit-text-size-adjust: 100%;
+	-ms-text-size-adjust:     100%;
+}
+
+body {
+	margin: 0;
+}
+
+img {
+	display: block;
+	border: 0;
+	width: 100%;
+	height: auto;
+}
+
+
+/*--------------------------------------------------------------
+Accessibility
+--------------------------------------------------------------*/
+/* Text meant only for screen readers */
+.screen-reader-text {
+	clip: rect(1px, 1px, 1px, 1px);
+	position: absolute !important;
+	height: 1px;
+	width: 1px;
+	overflow: hidden;
+}
+
+.screen-reader-text:hover,
+.screen-reader-text:active,
+.screen-reader-text:focus {
+	background-color: #f1f1f1;
+	border-radius: 3px;
+	box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.6);
+	clip: auto !important;
+	color: #21759b;
+	display: block;
+	font-size: 14px;
+	font-weight: bold;
+	height: auto;
+	left: 5px;
+	line-height: normal;
+	padding: 15px 23px 14px;
+	text-decoration: none;
+	top: 5px;
+	width: auto;
+	z-index: 100000; /* Above WP toolbar */
+}
+
+
+/*--------------------------------------------------------------
+Typography
+--------------------------------------------------------------*/
+body,
+button,
+input,
+select,
+textarea {
+	color: #404040;
+	font-family: 'Helvetica', Arial, sans-serif;
+	font-size: 18px;
+	line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+	text-align: center;
+	margin: 0;
+	padding: 1em 0;
+}
+
+p {
+	margin: 0;
+	padding: 1em 0;
+}
+
+
+
+
+/* Promo section */
+
+.logo,
+.site-title {
+	text-align: center;
+}
+
+.logo {
+	font-size: 8em;
+}
+
+.site-title {
+	margin-top: -1em;
+	margin-bottom: 3em;
+}
+
+/* Splash section */
+
+.splash {
+	background: #FFF6E5;
+	padding-bottom: 2em;
+}
+
+.splash-content {
+	padding: 1.5em;
+}
+
+@media screen and (min-width: 600px) {
+	.splash-text {
+		columns: 2;
+		column-gap: 2em;
+	}
+
+	.splash-text p {
+		padding-top: 0;
+	}
+}
+
+/* Buckets section */
+
+.buckets {
+	padding: 2em 1em 1em;
+	background: #3E454C;
+}
+
+.buckets ul {
+	margin: 0;
+	padding: 0;
+}
+
+.buckets li {
+	margin-bottom: 1em;
+	background: white;
+	list-style-type: none;
+}
+
+.bucket {
+	padding: 1.5em;
+}
+
+/* More section */
+
+.more {
+	padding: 2em;
+}
+
+/* Twins section */
+
+.twin {
+	padding: 2em;
+	background: #2185C5;
+	color: white;
+}
+
+.twin:last-of-type {
+	background: #FF7F66;
+}
+
+/* Colophon section */
+.colophon {
+	padding: 2em;
+	background: hsl(0, 0%, 10%);
+	color: white;
+	text-align: center;
+}
+
+.colophon a {
+	color: white;
+}
+
+.colophon a:hover,
+.colophon a:focus {
+	border-bottom: 1px solid white;
+}
+
+/*--------------------------------------------------------------
+If no grid support, limit width to 50em and center align
+--------------------------------------------------------------*/
+@supports not (display: grid) {
+	.grid {
+		max-width: 50em;
+		margin: 0 auto;
+	}
+}
+
+/*--------------------------------------------------------------
+Use flex to create a three-bucket layout 
+--------------------------------------------------------------*/
+
+@media screen and (min-width: 700px) {
+	@supports (display: flex) {
+
+		.buckets ul {
+			display: flex;
+			justify-content: space-around;
+		}
+
+		.buckets li {
+			width: 31%;
+		}
+
+	}
+}
+
+/*--------------------------------------------------------------
+CSS Grid layout for wider screens, when browser supports grid:
+--------------------------------------------------------------*/
+
+@media screen and (min-width: 600px) {
+	/* Layout with CSS Grid */
+	@supports (display: grid) {
+
+		/* Four-column layout. Two center columns have a total max width of 50em: */
+		.grid {
+
+			display: grid;
+			grid-template-columns: 1fr repeat(2, minmax(auto, 25em)) 1fr;
+		}
+
+		/* Center items by placing them in the two center columns: */
+		.splash-content,
+		.more-content,
+		.buckets ul {
+			grid-column: 2/4;
+		}
+
+		/* Use automatic grid placement + span to let each item span two columns:*/
+		.twin,
+		.colophon aside {
+			grid-column: span 2;
+		}
+
+	}
+}
+
+    </style>
+</head>
+
+<body>
+    <a class="skip-link screen-reader-text" href="#content">Skip to content</a>
+    
+    <header class="masthead">
+        <div class="logo">G</div>
+        <h2 class="site-title">is for Grid</h2>
+        <img src="https://source.unsplash.com/vMRMYoLQzwo" alt="A man and a woman standing in the water of the Oslo fjord.">
+    </header>
+    <!-- .masthead -->
+    
+    <main id="content" class="main-area">
+        <section class="splash grid">
+            <div class="splash-content">
+                <h2 class="content-title">Full Bleed CSS Grid</h2>
+                <div class="splash-text">
+                    <p>CSS Grid provides a trivial solution to a complex problem: How to display full-bleed content mixed with center-aligned
+                        width-constrained content. This solution elimiates the need for auto-margins and floats while allowing
+                        the developer to change the grid globally and see those changes apply to each element individually.</p>
+                </div>
+                <!-- .splash-text -->
+            </div>
+            <!-- .splash-content -->
+        </section>
+        <!-- .splash -->
+    
+        <section class="buckets grid">
+            <ul>
+                <li>
+                    <img src="https://source.unsplash.com/KUfkX6gVwBU/600x400" alt="">
+                    <div class="bucket">
+                        <h3 class="bucket-title">Grid is great</h3>
+                        <p>CSS Grid is a two-dimensional layout tool. It is great for layout out content in a grid, and for laying
+                            out content in two dimensions.</p>
+                    </div>
+                    <!-- .bucket -->
+                </li>
+                <li>
+                    <img src="https://source.unsplash.com/w3lQVmuK8fw/600x400" alt="">
+                    <div class="bucket">
+                        <h3 class="bucket-title">Flex is great too</h3>
+                        <p>That said, Grid is not always the right option for layuts. If for example you need to lay out a series
+                            of identical boxes like those you see here, Flex may be a better option.</p>
+                    </div>
+                    <!-- .bucket -->
+                </li>
+                <li>
+                    <img src="https://source.unsplash.com/1jKjJjGgDG8/600x400" alt="">
+                    <div class="bucket">
+                        <h3 class="bucket-title">Know what tool to use</h3>
+                        <p>In some cases Grid and Flex are interchangeable. In other cases one is definitely better than the other.
+                            The choice usually comes down to whether you are laying out a list of items (Flex) or creating a
+                            more nuanced layout (Grid).</p>
+                    </div>
+                    <!-- .bucket -->
+                </li>
+            </ul>
+        </section>
+        <!-- .buckets -->
+    
+        <section class="more grid">
+            <div class="more-content">
+                <h2 class="content-title">Subgrid would be nice here</h2>
+                <p>The solution provided here is limited by the lack of support for subgrids. If subgrids were available, the solution
+                    would be more refined. In lieu of subgrid, the solution applies a grid to each full-bleed section within
+                    the layout using a common class
+                    <code>.grid</code> and creates the full-bleed/centered effect that way.
+                    <p>
+            </div>
+            <!-- .more-content -->
+        </section>
+        <!-- .more -->
+    
+        <section class="twins grid">
+            <div class="twin">
+                <h2 class="content-title">Grid lets you do unusual things</h2>
+                <p>Creating this layout, where two items share the total available viewport width evenly alongside full-width and
+                    centered content, is suprisingly complex if you don't have CSS Grid available.</p>
+            </div>
+            <div class="twin">
+                <h2 class="content-title">Grid requires a rethink</h2>
+                <p>Seeing this layout you may still think it's better to just use old methods with auto-margins and max-widths.
+                    And you
+                    <em>can</em>, but looking at the CSS you'll see the Grid approach is both cleaner and easier to understand.</p>
+            </div>
+        </section>
+        <!-- .twins -->
+    </main>
+    
+    <footer class="colophon grid">
+        <aside>Content, layout, design:
+            <a href="https://twitter.com/mor10" target="_blank" rel="nofollow">Morten Rand-Hendriksen</a>.</aside>
+        <aside>All photos:
+            <a href="https://unsplash.com/@andozo" target="_blank" rel="nofollow">Andreas Rønningen</a>.</aside>
+    </footer>
+
+</body>
+
+</html>
