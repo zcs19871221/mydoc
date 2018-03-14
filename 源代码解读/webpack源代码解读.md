@@ -360,17 +360,19 @@ lib/writeSource.js
 首先是parse.js,把require中的变量拼接的固定部分取出来了，形成一个context属性。
 对应代码在parse.js的178行：
 context属性如下：
-					var newContext = {
-                        //require中的静态字符串部分
-						name: dirname,
-						require: true,
-                        //第一个元素是name属性的静态字符串在文件中的位置
-						replace: [[108, 139], remainder],
-						calleeRange: expression.callee.range,
-						line: expression.loc.start.line,
-						column: expression.loc.start.column
 
-					};
+    var newContext = {
+        //require中的静态字符串部分
+        name: dirname,
+        require: true,
+        //第一个元素是name属性的静态字符串在文件中的位置
+        replace: [[108, 139], remainder],
+        calleeRange: expression.callee.range,
+        line: expression.loc.start.line,
+        column: expression.loc.start.column
+    };
+
+
 我们可以分析出，context是require中由静态字符和变量组合而成的require形式。
 
 ## resolve.js修改
