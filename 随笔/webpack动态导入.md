@@ -36,7 +36,7 @@
 
 打包过程发生在编译阶段，webpack看不懂类似`import(someFunction())`这种语法，因为在编译阶段不知道someFunction()是什么，
 webpack只认识这种语法`import('./app' + xx + '/store/index.js')`，webpack的理解就是
-把变量替换成占位符，把匹配这个模式`./app/*/store/index.js`的文件都打成一个块，然后程序运行的时候，再根据变量生成的路径，匹配真正的模块。
+把变量替换成占位符，把匹配这个模式`./app/*/store/index.js`的文件分别打成chunk，然后程序运行的时候，再根据变量生成的路径，匹配对应chunk块。
 
 3. 有效的变量拼接开头
     1. 以webpack配置的alias开头
