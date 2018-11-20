@@ -75,3 +75,11 @@
         depend2.mockImplementation(() => '[depend2]')
         expect(toTestFunction()).toEqual('[doit]_[fromJS]_[moment]_[depend2]')
     })
+
+# 如何写出分离依赖的代码
+
+1. 拆分代码到多个文件，通过模块引入，测试时候 mock 这些模块。
+2. 拆分代码成多个函数，上一个（n 个）函数的结果作为参数输入，不用 mock。
+3. 转变成类，通过 this 或类名（静态属性）引用，mock 类的引用。
+4. 永远不要直接引用同一个文件下的索引，耦合，用上面 3 种方法解耦
+5. solid 单一职责，开发关闭，李氏替换，依赖倒置。
