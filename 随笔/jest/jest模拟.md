@@ -1,11 +1,23 @@
-# 预缓存的模块无法 mock，比如 reselect 的 createSelector,因为这个不是直接饮用。
+# 模块的替换使用 jest.mock
 
-# 正常模块的替换使用 jest.mock
+1.  使用 jest.mock(路径)实现模块模拟,第二个参数的函数体执行后的返回值将是替换后的模块
+2.  如果是 import {}这种形式的，jest.mock 第二个参数返回一个对象
+3.  如果是 import XX from '路径'这种 default 的，jest.mock 第二个参数的函数返回一个函数
+4.  如果是既有 name import 又有 default import，或者碰上 2 或 3 通用，那么如下：
 
-1. 使用 jest.mock(路径)实现模块模拟,第二个参数的函数体执行后的返回值将是替换后的模块
-2. 如果是 import {}这种形式的，jest.mock 第二个参数返回一个对象
-3. 如果是 import XX from '路径'这种 default 的，jest.mock 第二个参数的函数返回一个函数
-4. 所有的模块使用 jest.fn(),等到具体的 it 测试的时候，通过`模块名.mockImplementation`来实现具体 mock 值。
+        jest.mock('./depend', () => {
+            //返回原始依赖，防止程序调用没有mock的引用为空
+            const origin = require.requireActual('./depend);
+            return {
+                ...origin,
+                //必须有，保证defaultimport存在
+                __esmodule: true,
+                default: jest.fn(),
+                a: jest.fn(),
+            }
+        })
+
+5.  所有的模块使用 jest.fn(),等到具体的 it 代码的时候，通过`模块名.mockImplementation`来实现具体 mock 值。
 
 具体代码如下：
 
@@ -75,6 +87,16 @@
         depend2.mockImplementation(() => '[depend2]')
         expect(toTestFunction()).toEqual('[doit]_[fromJS]_[moment]_[depend2]')
     })
+
+# 如何只 mock 部分依赖
+
+    jest.mock('./module', () => {
+        const original = require.requireActual('./selectorbase');
+        return {
+            ...original,
+            wantMockModule: jest.fn(),
+        }
+    });
 
 # 如何写出分离依赖的代码
 

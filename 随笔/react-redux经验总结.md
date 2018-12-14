@@ -24,3 +24,24 @@
 2. 在写好 selector 和 action 链接到 connect 的时候，容易出错。在父组件向子组件传递 props 时候容易出错。
 3. 组件越纯越好，只有 props 和最小化的 state，不要在顶部引入 connect 的组件,selector 等。可以先通过高阶组件传递预定义的 props，然后通过 connect 传递需要的 action 和 state 数据。
 4. 不要把组件不关心的 props 给这个组件以用来传递给子组件。如果子组件需要数据的话直接使用 connect 链接数据到这个组件。（有人认为通过顶层统一传递好，但是这样看起来就乱，不好，而且 react 作者也觉着按需 connect 可以）
+
+# 选择器
+
+## 把 selector 和 reducer 写在一块
+
+好处：
+
+1. 这样改变了 reducer 结构，可以立刻改变对应 selector
+2. 这样只有这个文件知道 reducer 的真实结构，其他的文件都不知道 reducer 的结构。
+
+## selector 如何提升性能
+
+1. 缓存的条件是所有参数不变，形如 createSelector(A,B,C,D,...., mergeFunc)这样的，只要保证最终合并方法钱的 A,B,C,D 等选择器的值都和之前的不变，那么 mergeFunc 就不会执行，直接返回。
+2. 因此，选择器的书写原则是
+   1. 把类似 filter,map 这种会完全生成新对象的方法包装到 createSelector 中，让他依赖一个前置的选择器，比如一个固定 list，这样当这个 list 不变的时候，就不会执行自己的 filter,map 方法，不会造成组件的刷新。
+   2. connect 中每一个属性用 createSelector 包装，禁止直接返回数组或对象，这样防止从新渲染。
+
+# immutable 的问题
+
+1. 使用 toJS 方法每次都创建不同的元素，这样如果在 connect 方法里面的话，会导致每次都渲染。
+2. 解决方法是在 connect 的组件上再套一层高阶组件，在这里对 props 执行 toJS 方法，这样当 immutable 不变的时候，不需要执行 toJS 方法
