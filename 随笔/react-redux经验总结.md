@@ -27,7 +27,7 @@
 
 # 选择器
 
-## 把 selector 和 reducer 写在一块
+## 把 selector 和 reducer 写在一块，default 导出 reducer，name 导出 selector
 
 好处：
 
@@ -45,3 +45,21 @@
 
 1. 使用 toJS 方法每次都创建不同的元素，这样如果在 connect 方法里面的话，会导致每次都渲染。
 2. 解决方法是在 connect 的组件上再套一层高阶组件，在这里对 props 执行 toJS 方法，这样当 immutable 不变的时候，不需要执行 toJS 方法
+
+# store 存储的数据类型不要有复杂的类对象
+
+好处是：
+
+1. 可以方便存到 localstorage
+2. 可以方便从后端获取数据
+   因为这两个地方只能存放最简单的 json 数据，如果你使用 moment 这种复杂对象直接保存到
+   store 中，你在从 1 或者 2 获取数据的时候需要额外的进行数据转换。（不能直接 parse）
+
+坏处是：
+
+1. 获取数据后，使用前需要类型转换
+2. 保存到 store 前要转换成 json 数据。
+
+# fetch 数据时候，使用 then 的第二个参数处理网络请求失败，而不要在 catch 处理
+
+因为 catch 的时候，你的错误可能包含 action,reducer 中的代码计算错误，这样两种错误就混淆了。
