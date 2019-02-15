@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>单词</title>
+    <style type="text/css">
+      html,
+      body {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+      }
+      body {
+        display: flex;
+        justify-content: space-between;
+      }
+      ol.wrap {
+        /*            display: flex;
+            flex-flow: column wrap;
+            height: 100%;*/
+        margin-left: 50px;
+      }
+      .fanyi {
+        margin-left: 20px;
+        background-color: black;
+        cursor: pointer;
+      }
+      .showFanyi {
+        background-color: white;
+      }
+      .randomButton {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        color: red;
+      }
+      li {
+        height: 40px;
+        line-height: 40px;
+      }
+      .delete {
+        margin-left: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <button class="randomButton" onclick="random()">重排顺序</button>
+  </body>
+  <script type="text/javascript">
+    var danci = {
+      hypothetical: "假想",
+      primitive: "原始",
+      adoption: "采用",
+      radical: "激进",
+      roughly: "大概",
+      magnitude: "大小",
+      radically: "根本",
+      adjusting: "调整",
+      modular: "模块化",
+      distinct: "不同",
+      convey: "传达",
+      abbreviations: "缩写",
+      ambiguous: "暧昧，含糊，模糊",
+      obfuscated: "混淆",
+      yields: "产量，生产",
+      delimit: "分隔,划界",
+      regress: "回退，复原",
+      deviates: "偏离",
+      propagates: "传播",
+      traffic: "运输量,流量",
+      conventions: "约定（命名）",
+      resemble: "类似",
+      embraced: "拥抱",
+      Pinterest: "照片分享网站(由pin图钉和Interest兴趣组成)",
+      scaling: "缩放",
+      appealing: "吸引人",
+      surveys: "调查",
+      legacy: "遗产",
+      transition: "过渡",
+      dedicated: "专门,专用",
+      nutshell: "简而言之",
+      absent: "缺席的",
+      accumulation: "积累",
+      comprehensive: "综合的",
+      refactoring: "重构",
+      substantial: "大量的",
+      typeface: "字体",
+      semantics: "语义",
+      colon: "冒号",
+      poll: "轮询",
+      exclusively: "仅仅，只，独占的",
+      "extent to a certent extent": "程度",
+      utilize: "利用",
+      horizontal: "水平",
+      vertical: "垂直",
+      adjacent: "相邻",
+      above: "在...之上",
+      metric: "度量(标准)",
+      abstracts: "摘要",
+      rapid: "快速",
+      illustrated: "插图",
+      "side effects": "副作用",
+      outline: "轮廓,概述",
+      assess: "评估",
+      overall: "总体",
+      compliant: "符合",
+      introduced: "介绍，采用",
+      operand: "操作数",
+      dimensions: "尺寸",
+      downside: "缺点",
+      tempting: "诱人",
+      hint: "暗示",
+      notion: "概念",
+      recap: "回顾",
+      axis: "轴",
+      inconspicuous: "不起眼的",
+      consistency: "一致性",
+      "suppress ": "压制",
+      compensate: "补偿",
+      inadequate: "不足",
+      resolution: "分辨率",
+      complement: "补充",
+      "curly braces": "大括号",
+      "essentially ": "实际上",
+      palette: "调色板",
+      "A good rule of thumb": "好的经验法则",
+      "vice versa.": "反之亦然",
+      specific: "具体的",
+      cumulative: "累积",
+      subtract: "减"
+    };
+    var notMemory = {};
+    var curFanyi = [];
+    function removefromCur(e) {
+      if (curFanyi.indexOf(e) > -1) {
+        curFanyi.splice(curFanyi.indexOf(e), 1);
+      }
+    }
+    function closeAll() {
+      curFanyi.forEach(function(e) {
+        e.classList.remove("showFanyi");
+      });
+      curFanyi = [];
+    }
+    function removeFromDanciObj(obj, key) {
+      var del = {};
+      for (var _key in obj) {
+        if (_key === key) {
+          del[_key] = obj[_key];
+          delete obj[_key];
+          break;
+        }
+      }
+      return del;
+    }
+    function addToDanciObj(obj, add) {
+      var addType = {}.toString.call(add);
+      for (var _key in add) {
+        if (obj[_key]) {
+          return alert("重复key!");
+        }
+        obj[_key] = add[_key];
+      }
+      add = null;
+    }
+    document.body.addEventListener("click", function(e) {
+      var target = e.target;
+      if (curFanyi.length > 0 && !target.classList.contains("fanyi")) {
+        closeAll();
+      } else if (target.classList.contains("fanyi")) {
+        if (!target.classList.contains("showFanyi")) {
+          curFanyi.push(target);
+        } else {
+          removefromCur(curFanyi);
+        }
+        target.classList.toggle("showFanyi");
+      }
+      if (target.className === "delete") {
+        removeFromList(target);
+      }
+    });
+    function removeFromList(target) {
+      var className = target.className,
+        key;
+      if (className === "eachli" && target.nodeName.toLowerCase() === "span") {
+        key = target.textContent;
+      } else {
+        do {
+          target = target.parentNode;
+        } while (
+          target &&
+          target.className === "eachli" &&
+          target.nodeName.toLowerCase() === "span"
+        );
+        if (target) {
+          key = target.firstChild.textContent;
+        }
+      }
+      if (key) {
+        addToDanciObj(notMemory, removeFromDanciObj(danci, key));
+        reCreate();
+      }
+    }
+    function createTree(keyArr, obj, type) {
+      var ol = document.createElement("ol");
+      ol.className = "wrap";
+      keyArr.forEach(function(key) {
+        var mean = obj[key],
+          li = document.createElement("li"),
+          spanKey = document.createElement("span"),
+          spanMean = document.createElement("span"),
+          button = document.createElement("button");
+        button.className = "delete";
+        button.textContent = "删除";
+        li.className = "eachli";
+        spanKey.className = "eachli";
+        spanKey.textContent = key;
+        spanMean.className = "fanyi";
+        spanMean.textContent = mean;
+        li.appendChild(spanKey);
+        li.appendChild(spanMean);
+        li.appendChild(button);
+        ol.appendChild(li);
+      });
+      if (type === "danci") {
+        var oldOl = document.querySelector(".wrap");
+        if (oldOl) {
+          oldOl.parentNode.replaceChild(ol, oldOl);
+        } else {
+          document.body.appendChild(ol);
+        }
+      } else if (type == "notMemory") {
+        var oldOl = document.querySelectorAll(".wrap");
+        if (oldOl.length === 2) {
+          oldOl[1].parentNode.replaceChild(ol, oldOl[1]);
+        } else {
+          document.body.appendChild(ol);
+        }
+      }
+    }
+    function ran(min, max) {
+      return Math.floor(min + Math.random() * (max - min + 1));
+    }
+    var after;
+    var _ar;
+    function random(len) {
+      after = after || Object.keys(danci);
+      var ar = after,
+        len = ar.length;
+      for (var i = 0; i < len; i++) {
+        var index = ran(i, len - 1);
+        var tmp = ar[index];
+        ar[index] = ar[i];
+        ar[i] = tmp;
+      }
+      _ar = ar;
+      createTree(ar, danci, "danci");
+    }
+    function reCreate() {
+      createTree(_ar || Object.keys(danci), danci, "danci");
+      createTree(Object.keys(notMemory), notMemory, "notMemory");
+    }
+    reCreate();
+  </script>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Xss攻击举例</title>
+  </head>
+  <body>
+    <fieldset>
+      <caption>
+        提交时候注入代码
+      </caption>
+      <form action="">
+        <label for=""> 用户名： <input value="ajax(document.cookie)" /> </label>
+      </form>
+    </fieldset>
+    <fieldset>
+      <caption>
+        用户访问页面时候中招注入代码
+      </caption>
+      <span for="">
+        用户名：
+        <script>
+          alert("1234");
+        </script>
+      </span>
+    </fieldset>
+  </body>
+</html>
