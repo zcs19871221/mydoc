@@ -128,10 +128,6 @@ ctrl + shift + space
 
     Ctrl + J
 
-## 行排序
-
-    F9
-
 ## 转大写
 
     Ctrl + k => Ctrl + U
@@ -139,3 +135,8 @@ ctrl + shift + space
 ## 转小写
 
     Ctrl + k => Ctrl + L
+
+# 左侧树
+1. 按住`alt`折叠/展开可以把所有子树进行折叠/展开
+2. 焦点在树，`输入字符`进行查找或高亮(通过配置的list：keyBorad Navigator切换)
+3. `ctrl+A`选中所有树的兄弟节点
