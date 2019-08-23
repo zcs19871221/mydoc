@@ -45,8 +45,8 @@
 ## 我的顺序
 
 - [x] tree
-- [ ] union find - doing
-- [ ] recursion
+- [x] union find - doing
+- [x] recursion
 - [ ] binay search
 - [ ] divide and conquer
 - [ ] backtracking
