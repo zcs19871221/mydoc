@@ -47,7 +47,8 @@
 - [x] tree
 - [x] union find - doing
 - [x] recursion
-- [ ] binay search
+- [x] binay search
+- [ ] hash table
 - [ ] divide and conquer
 - [ ] backtracking
 - [ ] dynamic program
