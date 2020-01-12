@@ -24,7 +24,7 @@ end = 最大值 + 1;
 
 
 
-# 算法模板
+# 模板
 
     const bs = (ar, target) => {
         let start = 0; 
