@@ -7,6 +7,7 @@
 1. 找到start和end，end需要为不可用的边界。(模板需要)
 2. 找到中间值和条件的关系。(计算函数)
 3. 条件关系套用正确：calcResult > condition or condition > calcResult
+    注意===一定在end = mid条件中。
 4. return start;
 
 ## 有序的数组
