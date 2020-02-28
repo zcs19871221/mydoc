@@ -1,138 +1,59 @@
-# nodejs源代码
-源代码位置：lib/_http_agent.js
+# 0. 连接池配置对 http request 的影响
 
-    //当有套接字(socket空闲时触发)
-    self.on('free', function(socket, options) {
-      var name = self.getName(options);
-      debug('agent.on(free)', name);
-      /*agent.requests是一个未分配套接字请求队列，这个name应该是域名
-      当目前有未分配套接字的请求的时候，把这个套接字直接分给这个请求。然后就完事了*/
-      if (socket.writable &&
-          self.requests[name] && self.requests[name].length) {
-        self.requests[name].shift().onSocket(socket);
-        if (self.requests[name].length === 0) {
-          // don't leak
-          delete self.requests[name];
-        }
-      } else {
-        //如果当前没有等待的请求的话
-        // If there are no pending requests, then put it in
-        // the freeSockets pool, but only if we're allowed to do so.
-        var req = socket._httpMessage;
-        //判断是不是keepalive为true
-        if (req &&
-            req.shouldKeepAlive &&
-            socket.writable &&
-            self.keepAlive) {
-          var freeSockets = self.freeSockets[name];
-          var freeLen = freeSockets ? freeSockets.length : 0;
-          var count = freeLen;
-          //agent.sockets是当前正在用的套接字队列，这里就是获取所有套接字：正在用的+空闲的
-          if (self.sockets[name])
-            count += self.sockets[name].length;
-          //如果总数大于设置的maxSockets或者空闲数目大于设置的maxFreeSockets，那么干掉这个套接字
-          if (count > self.maxSockets || freeLen >= self.maxFreeSockets) {
-            socket.destroy();
-          // 否则调用socket.setKeepAlive，内部机制就是调用系统层tcp的keepalive机制。把这个socket从当前使用的socket队列移出，放入freeSockets队列。
-          } else {
-            freeSockets = freeSockets || [];
-            self.freeSockets[name] = freeSockets;
-            socket.setKeepAlive(true, self.keepAliveMsecs);
-            socket.unref();
-            socket._httpMessage = null;
-            self.removeSocket(socket, options);
-            freeSockets.push(socket);
-          }
-        } else {
-          //如果没设置keepalive为true的话，有空闲的socket就销毁。
-          socket.destroy();
-        }
-      }
-    });
+maxSockets 和 maxFreeSockets 对于每一个 host 都是独立的。
+比如设置为 10 5，有两个域名。
+那么最后有可能产生 20 个 socket，10 个 free 的。
+两种情况：
 
+        keepalive：true
+          max sockets:允许建立的最多 tcp 链接(socket),压力大的情况下，全max数量可保持长连接。
+          max freeSockets：允许空闲的 tcp 链接最大个数，比如没那么多请求，就关闭max - free数量的socket。但保持free数量socket长连接。
 
-# 总结一下，只要用了agent，
-  1. 当socket空闲下来，只要有未分配的请求，都会进行复用，不管设置没设置keepalive。
-  2. 如果当前没有未分配的请求
-      1. 如果设置了keepalive，会根据maxSockets和freeSockets参数判断是否把这个socket暂存到freeSockets队列等待以后使用，并开启操作系统的TCP的keepalive功能。
-      2. 如果没设置keepalive，这个空闲的socket直接干掉
+        keepalive：false
+          有请求时，先查找establish状态的socket，如果有，复用establish状态的socket。establish最多
+          是maxSockets值。
+          如果没有establish，创建新的请求，创建数量不受maxSockets限制。发送完后，发送fin包结束链接。处于
+          time_wati状态。等待四分钟后系统释放socket。
+          (
+          当sockets处于establish状态时候(已建立连接但没接受到或接受完数据),如果有新的请求，
+          会复用这个sockets,不会创建新的sockets。复用的最大值是max sockets的值。
+          当sockets接受完数据后，没有新的请求，那么就会发送fin包结束链接。处于time_wait状态。
+          新的请求来创建新的链接，这个连接数不受max sockets影响。
+          )
 
+          当client的请求速率刚好小于服务器响应时间，导致time—wait缓慢增多，最容易导致端口溢出。（就是服务器response较快，当新的请求发起时，存在的请求已经结束，转为timewati，然后给新请求创建新的socket，导致端口溢出）
 
-# 测试代码
-server.js是服务端代码，send是客户端。
-服务端故意延迟返回以模拟请求队列的排队。
+          解决方法：
+            1. 设置keepalive true，
+            2. 减少max socket数量
 
-server.js
+# 1. nodejs 使用 http request 不设置 keepalive 配置 请求 node server 的 tcp 链接状态
 
-    var http = require("http");
-    var server = http.createServer( (req, res) => {
-      res.writeHead(200, {'Content-Type': 'text/plain'});
-      //故意延迟返回以模拟请求队列的排队
-      setTimeout(function() {
-        res.end('okay');
-      }, 1000)   
-    });
-    server.listen(9980);
-    server.on("connection", function(socket) {
-        console.log("connection");
-    })
-    server.on("close", function() {
-        console.log("close");
-    })
-    setInterval(function() {
-        server.getConnections(function(err, num) {
-            console.log("当前连接" + num);
-        });
-    }, 1000);
+        agent发送请求，server响应请求。
+        agent发送【结束包】，server响应结束包。
+        server发送结束包，agent响应结束包。
+        server接收结束包，server关闭。
+        agent进入time_wait状态,默认等待2msl(默认1分钟)时间后关闭。
+        因为网络的非可靠性，所以必须设置time_wait。这是tcp协议决定的时间
 
-send.js
+# 2. nodejs 使用 http request 设置 keepalive 配置 请求 node server 的 tcp 链接状态
 
-    const 
-        http = require("http");
-    let
-        settings = {
-            eachTimeSendNum: 20,
-            sendInterval: 500,
-            isKeepAlive: false,
-            maxSockets: 5,
-            maxFreeSockets: 5
-        }, 
-        agent = new http.Agent({
-            keepAlive: settings.isKeepAlive,
-            maxSockets: settings.maxSockets,
-            maxFreeSockets: settings.maxFreeSockets 
-        }), 
-        options = {
-            hostname: "127.0.0.1",
-            port: 9980,
-            method: 'GET',
-            agent: agent,
-            path: "/"
-        };
-    function sendRequest() {
-        let req = http.request(options, function (res) {
-            res.on("data", (chunk) => {
-                console.log(chunk.toString());
-            });
-            res.on("end", () => {     
-            });
-        });  
-        req.end(); 
-        req.on("socket", function(socket) {
-            if (!socket.__isNew) {
-                socket.on("connect", function _connect() {
-                    console.log("connect");
-                })
-                socket.__isNew = true;
-            }
-        })
-    }
-    (function realSend() {
-        for (var i = 0;i < settings.eachTimeSendNum; i++) {
-            sendRequest();  
-        }
-        setTimeout(realSend, settings.sendInterval);
-    }());
-# 关于keepalive
+    agent请求获得服务端数据后，默认不会发送【结束包】
+    让agent和server的tcp链接长时间保持establish。
+
+    保持free数量的socket长连接不关闭。如果请求的链接数对应当前free数的socket能满足，不创建新请求。
+    如果不能，就创建到最大free数socket并保持长连接状态。
+    如果最大free数还满足不了，创建新的tcp链接到max，使用完后这些非free的socket如果空闲就关闭。
+    如果请求太多，就保持最多max数的socket复用，当空闲时候，关闭非free socket。
+
+# 3. keepalive 的首次延迟发送嗅探包时间的影响？
+
+# 4. 链接池（socket）和 keepalive 和 linux tcp 连接数的关系？
+
+# 5. 为什么 nginx 链接设置 keepalive 会报错（疑似被 nginx 关闭链接，但是我这里保持），如果设置 300ms 的首次延迟呢？
+
+# 6. 为什么 tomcat 不设置 keepalive 会报错？
+
+# 关于 keepalive
+
 [参考](tcp翻译.md)
-
