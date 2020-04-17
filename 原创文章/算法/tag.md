@@ -48,7 +48,10 @@
 - [x] union find - doing
 - [x] recursion
 - [x] binay search
+- [ ] trie tree
 - [ ] hash table
+- [ ] heap
+- [ ] stack
 - [ ] divide and conquer
 - [ ] backtracking
 - [ ] dynamic program
