@@ -8,44 +8,44 @@
 
 # 模板
 
-    const helper = (nums, start, length, target) => {
-        const res = []
-        if (length === 2) {
-            let left = start;
-            let right = nums.length - 1;
-            while (left < right) {
-                const sum = nums[left] + nums[right];
-                if (sum === target) {
-                    res.push([nums[left], nums[right]]);
-                    while (left < right && nums[left] === nums[left + 1]) {
+        const helper = (nums, start, length, target) => {
+            const res = []
+            if (length === 2) {
+                let left = start;
+                let right = nums.length - 1;
+                while (left < right) {
+                    const sum = nums[left] + nums[right];
+                    if (sum === target) {
+                        res.push([nums[left], nums[right]]);
+                        while (left < right && nums[left] === nums[left + 1]) {
+                            left++;
+                        }
+                        while (left < right && nums[right] === nums[right - 1]) {
+                            right--
+                        }
+                        left++;
+                        right--;
+                    } else if (sum > target) {
+                        right--
+                    } else {
                         left++;
                     }
-                    while (left < right && nums[right] === nums[right - 1]) {
-                        right--
+                }
+            } else {
+                for (let i = start; i < nums.length - length + 1; i++) {
+                    if (i > start && nums[i] === nums[i - 1]) {
+                        continue;
                     }
-                    left++;
-                    right--;
-                } else if (sum > target) {
-                    right--
-                } else {
-                    left++;
+                    const tmp = helper(nums, i + 1, length - 1, target - nums[i]);
+                    tmp.forEach(each => {
+                        each.push(nums[i])
+                    })
+                    res.push(...tmp)
                 }
             }
-        } else {
-            for (let i = start; i < nums.length - length + 1; i++) {
-                if (i > start && nums[i] === nums[i - 1]) {
-                    continue;
-                }
-                const tmp = helper(nums, i + 1, length - 1, target - nums[i]);
-                tmp.forEach(each => {
-                    each.push(nums[i])
-                })
-                res.push(...tmp)
-            }
+            return res;
         }
-        return res;
-    }
-    var fourSum = function(nums, target) {
-        nums.sort((a,b) => a - b)
-        return helper(nums, 0, 4, target)
-    };
+        var fourSum = function(nums, target) {
+            nums.sort((a,b) => a - b)
+            return helper(nums, 0, 4, target)
+        };

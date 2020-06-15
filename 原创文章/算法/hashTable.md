@@ -35,3 +35,13 @@ hash[list2[index]]--;
 
 在原数组遍历,把值 - 1的index设置成负数.如果发现已经是负数,说明重复.
 最后再遍历一遍,找出非负数的数字就是缺少数字.
+
+4. 通过巧妙设置hashMap的key来判重
+ 有一个数独，判断这个数独表是否正确（是否行，列，方块中有重复的值）
+ 行键：rowIndex_value
+ 列键：colIndex_value
+ 块键：(row / 3)_(col / 3)_value
+
+ 5. hashMap用于链表复制
+
+    hashMap中key是原链表，value是新建链表，通过get原节点来映射
