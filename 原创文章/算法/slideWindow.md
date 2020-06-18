@@ -1,25 +1,53 @@
 # 什么题目用到
-【连续】【子串】相关的，涉及【数量】计算的。
-可对【O(n*n)brute force】进行优化
+数组字符串的子元素问题。可以把多层循环转变为单循环。
+
 
 # 原理
+1. 使用两指针：左指针和右指针代表一个滑动窗口
+2. 右指针右移直到左，右指针之内存在一个有效解
+3. 移动左指针，缩小窗口直到发现最优解
 
-`sum [i，j] = sum [0，j]-sum [0，i-1]`
+# 模板
+1. 根据子串生成计数hashMap map
+2. 设置count = map.size
+3. 右指针右移动直到结束，hashMap - 1，如果hashMap为0，count--
+4. 当count === 0时候，左指针右移，这块操作和上面是镜像的。如果hashMap为0，count++。hashMap + 1.
 
-    问题：求连续子串s[i, j]中和为count的个数
-    可转换为s[i] + s[i + 1] + .. s[j] === count 的个数
-    可转换为(sum[j] = s[0] + ... s[j]) - (sum[i] = s[0] + ... s[i])  === count 的个数
-    转换为sum[i] = sum[j] - count
-    那么我们只需要记录map[i]的个数，当遍历求出sum的时候，求map[acc - count]的数量并累加即可。
+const map = new Map();
+for (const str of subStr) {
+    if (map.has(str)) {
+        map.set(str, map.get(str) + 1)
+    } else {
+        map.set(str, 1)
+    }
+}
+const count = map.size;
+let left = 0;
+let right = 0;
+while (right < target.length) {
+    // 如果存在hashMap，计数 - 1.
+    // 当计数为0时候，说明已经找到所有目标字符串，count+1，准备移动左指针来查找最优解
+    const rightVal = target[right]
+    if (map.has(rightVal)) {
+        map.set(rightVal, map.get(rightVal) - 1)
+        if (map.get(rightVal) === 0) {
+            count--;
+        }
+    }
+    right++;
+    while (count === 0) {
+        const leftVal = target[left];
+        if (map.has(leftVal)) {
+            if (map.get(leftVal) === 0) {
+                count++;
+            }
+            map.set(leftVal, map.get(leftVal) + 1)
+        }
+        // 根据题目的查找模板
+        left++
+    }
+}
 
-# 如何做
-1. 设置map map[0] = 1
-2. 遍历数组，求得累加值
-3. 使用map[acc - sum]查找数量，累加数量、
-4. 最后map[acc] = (map[acc] || 0) + 1
-
-# 时间复杂度
-o(n)
 
 # 例题
-930  76 438 30 3 159 567 340 424
+438
