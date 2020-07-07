@@ -48,9 +48,9 @@
 - [x] union find - doing
 - [x] recursion
 - [x] binay search
-- [ ] trie tree
-- [ ] sliding window
-- [ ] hash table
+- [x] trie tree
+- [x] sliding window
+- [x] hash table
 - [ ] heap
 - [ ] stack
 - [ ] divide and conquer
