@@ -51,7 +51,7 @@
 - [x] trie tree
 - [x] sliding window
 - [x] hash table
-- [ ] heap
+- [x] heap
 - [ ] stack
 - [ ] divide and conquer
 - [ ] backtracking
