@@ -25,4 +25,17 @@ const canWin = (n, map = new Map()) => {
   return res;
 };
 
+
+// const canWinDp = (n: number, map: Map<number, boolean> = new Map()): boolean => {
+//   const dp: boolean[] = new Array(n + 1);
+//   dp[1] = false;
+//   dp[2] = true;
+//   dp[3] = true;
+//   dp[4] = false;
+//   for (let i = 5; i <= n; i++) {
+//       dp[i] = !dp[i - 1] || !dp[i - 2] || !dp[i - 4]
+//   }
+//   return dp[n];
+// };
+
 console.log(canWin(6));
