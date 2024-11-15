@@ -25,3 +25,7 @@
       ToolA.java
       ToolB.java
       ToolC.java
+
+# 表示触发时候的动作，用on
+
+比如变量名表示匹配时候清除之前日志，使用 ** clearLogOnMatch **
