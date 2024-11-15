@@ -1,0 +1,27 @@
+# enum - 名称大写开头，骆驼，key全部大写，多个单词以_连接
+
+    enum DeviceType {
+       DEVELOPMENT = 0,
+       PRODUCTION = 1,
+       UPPERCASE_SNAKE_CASE = 2，
+    }
+
+# 文件夹
+1. 统一小写
+2. 后端：以下划线_连接多个词： **log_monitor**
+3. 前端：以中线-连接多个词：**log-monitor**
+
+# 文件夹用复数还是单数形式
+
+1. 如果文件夹内围绕一个概念，用单数，比如下面
+
+    tool/
+      ToolManager.java
+      ToolHelper.java
+
+2. 如果文件夹内有多个相关的实体，用复数数，比如下面
+
+  tools/
+      ToolA.java
+      ToolB.java
+      ToolC.java
