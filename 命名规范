@@ -29,3 +29,58 @@
 # 表示触发时候的动作，用on
 
 比如变量名表示匹配时候清除之前日志，使用 ** clearLogOnMatch **
+
+# 类中的属性，方法如何加空行
+1. 不要加额外空行
+2. 在不同组（方法和属性，或者不同业务）之间加空行
+
+    
+    public class LogStatusManager {
+        // Instance Variables
+        private String labelToDisplay;
+        private String colorOfDisplayedLabel;
+        private String regexpToMatch;
+        private Boolean isErrorStatus;
+        private Boolean clearLogOnMatch;
+    
+        // Constructor
+        public LogStatusManager(String labelToDisplay, String colorOfDisplayedLabel, String regexpToMatch) {
+            this.labelToDisplay = labelToDisplay;
+            this.colorOfDisplayedLabel = colorOfDisplayedLabel;
+            this.regexpToMatch = regexpToMatch;
+        }
+    
+        // Getter/Setters
+        public String getLabelToDisplay() {
+            return labelToDisplay;
+        }
+    
+        public void setLabelToDisplay(String labelToDisplay) {
+            this.labelToDisplay = labelToDisplay;
+        }
+    
+        public String getColorOfDisplayedLabel() {
+            return colorOfDisplayedLabel;
+        }
+    
+        public void setColorOfDisplayedLabel(String colorOfDisplayedLabel) {
+            this.colorOfDisplayedLabel = colorOfDisplayedLabel;
+        }
+    
+        // Business Methods
+        public Boolean isErrorStatus() {
+            return isErrorStatus;
+        }
+    
+        public void setErrorStatus(Boolean isErrorStatus) {
+            this.isErrorStatus = isErrorStatus;
+        }
+    
+        public Boolean clearLogOnMatch() {
+            return clearLogOnMatch;
+        }
+    
+        public void setClearLogOnMatch(Boolean clearLogOnMatch) {
+            this.clearLogOnMatch = clearLogOnMatch;
+        }
+    }
