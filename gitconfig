@@ -1,0 +1,102 @@
+
+
+[alias]
+    # List things
+    tags = "tag -l"
+    branches = "branch -a"
+    remotes = "remote -v"
+
+    # Shorten common commands
+    co = "checkout"
+    st = "status"
+    br = "branch"
+    ci = "commit"
+    d = "diff"
+
+    # Log that shows titles of last 16 commits
+    l = "log -16 --color=always --all --topo-order --pretty='%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
+
+    # Log that starts a pager with titles of all the commits in your tree
+    ll = log --color=always --all --topo-order --pretty='%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+
+    # Log that shows the last 10 commits as a graph
+    lg = "log -10 --color=always --all --graph --topo-order --pretty='%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
+
+    # Log that shows all commits as a graph (using a pager)
+    lgl = "log --color=always --all --graph --topo-order --pretty='%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+
+    # Show outgoing commits
+    out = "log @{u}.."
+
+    # Print the title of the current branch; sometimes useful for scripting
+    currentbranch = "!git branch --contains HEAD | grep '*' | tr -s ' ' | cut -d ' ' -f2"
+
+    # Better diffs for prose
+    wdiff = "diff --color-words"
+
+    # Safer pulls; don't do anything other than a fast forward on merge
+    pull = "pull --ff-only"
+
+    # Amend last commit without modifying commit message
+    amend = "!git log -n 1 --pretty=tformat:%s%n%n%b | git commit -F - --amend"
+
+    # Create a commit that will be automatically squashed as a fixup when you
+    # run `git rebase --autosquash`
+    fixup = "commit --fixup=HEAD"
+	ckwith = "!f() { branch=$(git branch -a | grep \"$1\" | head -n 1 | sed \"s/remotes.origin.//\" | sed \"s/* //\" | xargs); if [ -n \"$branch\" ]; then git checkout \"$branch\"; else echo \"No matching branch found\"; fi; }; f"
+	
+    new = "!f() { \
+      branch_type=\"\"; \
+      if [[ \"$1\" == f-* ]]; then \
+        branch_type=\"feature/${1#f-}\"; \
+      elif [[ \"$1\" == b-* ]]; then \
+        branch_type=\"bugfix/${1#b-}\"; \
+      else \
+        echo \"Invalid params. Use f-[name] for feature or b-[name] for bugfix.\"; \
+        exit 1; \
+      fi; \
+      git fetch origin main && git checkout -b \"$branch_type\" origin/main; \
+    }; f"
+
+ sync = "!f() { \
+      target_branch=\"$1\"; \
+      if [ -z \"$target_branch\" ]; then \
+        target_branch=$(git branch --show-current); \
+        echo \"Using current branch '$target_branch' as target branch...\"; \
+        echo \"\"; \
+      else \
+        target_branch=$(git branch --list | grep \"$target_branch\" | head -n 1 | xargs); \
+        if [ -z \"$target_branch\" ]; then \
+          echo \"No matching branch found for '$1'. Exiting...\"; \
+          echo \"\"; \
+          exit 1; \
+        fi; \
+        echo \"Using matched branch '$target_branch' as target branch...\"; \
+      fi; \
+      remote_branch=$(git ls-remote --heads origin \"$target_branch\" | wc -l); \
+      if [ \"$remote_branch\" -eq 0 ]; then \
+        echo \"\"; \
+        echo \"Remote branch '$target_branch' does not exist. Pushing local branch to remote...\"; \
+        git push origin \"$target_branch\"; \
+      else \
+        echo \"\"; \
+        echo \"Syncing remote branch '$target_branch' to local...\"; \
+        git checkout \"$target_branch\"; \
+        git fetch origin \"$target_branch\"; \
+        git merge origin/\"$target_branch\"; \
+        git push origin \"$target_branch\"; \
+      fi; \
+      echo \"\"; \
+      echo \"Syncing remote develop branch to local...\"; \
+      git checkout develop; \
+      git fetch origin develop; \
+      git merge origin/develop; \
+      echo \"\"; \
+      echo \"Merging '$target_branch' into develop...\"; \
+      git merge \"$target_branch\"; \
+      echo \"\"; \
+      echo \"Pushing updated develop branch to remote...\"; \
+      git push origin develop; \
+    }; f"
+
+  
